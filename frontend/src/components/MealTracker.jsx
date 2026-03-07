@@ -1,7 +1,14 @@
-import { useState } from 'react';
-import { Clock, Flame, Pencil, Trash2, Check, X, Send } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Clock, Flame, Pencil, Trash2, Check, X, Send, ChevronLeft, ChevronRight } from 'lucide-react';
 import QuickLog from './QuickLog';
 import './MealTracker.css';
+
+function toDateStr(d) { return d.toISOString().split('T')[0]; }
+
+function formatDateHeading(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+}
 
 const CHECKIN_QUESTIONS = [
   {
@@ -109,19 +116,44 @@ function MealCard({ meal, onEdit, onDelete }) {
 }
 
 export default function MealTracker({ meals = [], onQuickLog, onEditMeal, onDeleteMeal, onSubmitCheckin, checkinHistory = [] }) {
-  const today = new Date().toISOString().split('T')[0];
-  const todayCheckin = checkinHistory.find(c => c.date === today);
-  const [checkinAnswers, setCheckinAnswers] = useState(todayCheckin || {});
-  const [checkinSubmitted, setCheckinSubmitted] = useState(!!todayCheckin);
-  const todayMeals = meals.filter(m => m.loggedAt?.startsWith(today));
+  const today = toDateStr(new Date());
+  const [selectedDate, setSelectedDate] = useState(today);
+  const isToday = selectedDate === today;
+
+  const selectedCheckin = checkinHistory.find(c => c.date === selectedDate);
+  const [checkinAnswers, setCheckinAnswers] = useState(selectedCheckin || {});
+  const [checkinSubmitted, setCheckinSubmitted] = useState(!!selectedCheckin);
+
+  const shiftDate = (dir) => {
+    const d = new Date(selectedDate + 'T12:00:00');
+    d.setDate(d.getDate() + dir);
+    const next = toDateStr(d);
+    if (next > today) return;
+    setSelectedDate(next);
+    const checkin = checkinHistory.find(c => c.date === next);
+    setCheckinAnswers(checkin || {});
+    setCheckinSubmitted(!!checkin);
+  };
+
+  const goToday = () => {
+    setSelectedDate(today);
+    const checkin = checkinHistory.find(c => c.date === today);
+    setCheckinAnswers(checkin || {});
+    setCheckinSubmitted(!!checkin);
+  };
+
+  const dateMeals = useMemo(
+    () => meals.filter(m => m.loggedAt?.startsWith(selectedDate)),
+    [meals, selectedDate]
+  );
 
   const slotMap = {};
-  todayMeals.forEach(m => {
+  dateMeals.forEach(m => {
     if (!slotMap[m.type]) slotMap[m.type] = [];
     slotMap[m.type].push(m);
   });
 
-  const totals = todayMeals.reduce((acc, m) => ({
+  const totals = dateMeals.reduce((acc, m) => ({
     calories: acc.calories + (m.calories || 0),
     protein: acc.protein + (m.protein || 0),
     carbs: acc.carbs + (m.carbs || 0),
@@ -131,8 +163,19 @@ export default function MealTracker({ meals = [], onQuickLog, onEditMeal, onDele
   return (
     <div className="tracker-page">
       <div className="tracker-header">
-        <h2>Today's Meals</h2>
-        <div className="tracker-date">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+        <h2>{isToday ? "Today's Meals" : 'Meal History'}</h2>
+        <div className="tracker-date-nav">
+          <button className="date-nav-btn" onClick={() => shiftDate(-1)}>
+            <ChevronLeft size={18} />
+          </button>
+          <span className="date-nav-label">{formatDateHeading(selectedDate)}</span>
+          <button className="date-nav-btn" onClick={() => shiftDate(1)} disabled={isToday}>
+            <ChevronRight size={18} />
+          </button>
+          {!isToday && (
+            <button className="date-nav-today" onClick={goToday}>Today</button>
+          )}
+        </div>
       </div>
 
       <div className="tracker-totals">
@@ -171,21 +214,35 @@ export default function MealTracker({ meals = [], onQuickLog, onEditMeal, onDele
                 />
               ))
             ) : (
-              <div className="slot-empty">No meal logged yet</div>
+              <div className="slot-empty">No meal logged{isToday ? ' yet' : ''}</div>
             )}
           </div>
         ))}
       </div>
 
-      <QuickLog onLog={onQuickLog} />
+      {isToday && <QuickLog onLog={onQuickLog} />}
 
       <div className="tracker-checkin">
         <h3>Daily Check-in</h3>
-        {checkinSubmitted ? (
-          <div className="checkin-submitted">
-            <Check size={20} />
-            <span>Check-in complete for today. Thanks for reflecting!</span>
-          </div>
+        {checkinSubmitted || (!isToday && selectedCheckin) ? (
+          <>
+            <div className="checkin-submitted">
+              <Check size={20} />
+              <span>{isToday ? 'Check-in complete for today. Thanks for reflecting!' : `Check-in from ${formatDateHeading(selectedDate)}`}</span>
+            </div>
+            {selectedCheckin && (
+              <div className="checkin-review">
+                {CHECKIN_QUESTIONS.map(q => (
+                  <div key={q.id} className="checkin-review-item">
+                    <p className="checkin-q-text">{q.question}</p>
+                    <div className="checkin-review-answer">{selectedCheckin[q.id] || '—'}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : !isToday && !selectedCheckin ? (
+          <div className="checkin-empty">No check-in was recorded for this day.</div>
         ) : (
           <>
             {CHECKIN_QUESTIONS.map(q => (

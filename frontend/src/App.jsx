@@ -142,6 +142,11 @@ function reducer(state, action) {
     case 'SET_PREFERENCES':
       saveState('eathos_preferences', action.preferences);
       return { ...state, preferences: action.preferences };
+    case 'SET_PROFILE': {
+      const merged = { ...state.userProfile, ...action.profile };
+      saveState('eathos_profile', merged);
+      return { ...state, userProfile: merged };
+    }
     case 'TOGGLE_PREFERENCES':
       return { ...state, showPreferences: !state.showPreferences };
     case 'TOGGLE_MEAL_LOGGER':
@@ -482,9 +487,13 @@ function AppRoutes() {
           {state.showPreferences && (
             <DietaryPreferencesModal
               preferences={state.preferences}
+              userProfile={state.userProfile}
               onSave={(prefs) => {
                 dispatch({ type: 'SET_PREFERENCES', preferences: prefs });
                 dispatch({ type: 'TOGGLE_PREFERENCES' });
+              }}
+              onSaveProfile={(profile) => {
+                dispatch({ type: 'SET_PROFILE', profile });
               }}
               onClose={() => dispatch({ type: 'TOGGLE_PREFERENCES' })}
             />

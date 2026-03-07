@@ -71,6 +71,103 @@
   letter-spacing: 0.12em;
 }
 
+/* Profile form fields */
+.pref-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pref-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.pref-form-field label {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--color-ink-mid);
+  margin-bottom: var(--space-1);
+}
+
+.pref-form-field input,
+.pref-form-field select {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  background: var(--color-bg-warm);
+  transition: border-color var(--transition-fast);
+}
+
+.pref-form-field input:focus,
+.pref-form-field select:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  background: var(--color-white);
+}
+
+.pref-textarea {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  background: var(--color-bg-warm);
+  resize: vertical;
+  line-height: var(--leading-relaxed);
+  transition: border-color var(--transition-fast);
+}
+
+.pref-textarea:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  background: var(--color-white);
+}
+
+.pref-textarea::placeholder {
+  color: var(--color-ink-light);
+}
+
+/* Meal preference groups */
+.pref-meal-group {
+  margin-bottom: var(--space-1);
+}
+
+.pref-meal-notes {
+  width: 100%;
+  margin-top: var(--space-1);
+  margin-left: var(--space-3);
+  width: calc(100% - var(--space-3));
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-ink);
+  background: var(--color-bg-warm);
+  resize: vertical;
+  line-height: var(--leading-relaxed);
+  transition: border-color var(--transition-fast);
+}
+
+.pref-meal-notes:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  background: var(--color-white);
+}
+
+.pref-meal-notes::placeholder {
+  color: var(--color-ink-light);
+}
+
 /* Toggle switches */
 .toggle-list {
   display: flex;

@@ -40,7 +40,7 @@ export default function HomePage({ userProfile, inventory, mealHistory }) {
           </div>
           <div className="home-card-text">
             <h3>Chat with AI Nutritionist</h3>
-            <p>Get personalized nutrition advice, meal ideas, and wellness tips</p>
+            <p>Get personalized nutrition advice, trade off recommendations, and snack recommendations</p>
           </div>
           <ChevronRight size={20} className="home-card-arrow" />
         </button>
