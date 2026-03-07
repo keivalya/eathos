@@ -21,7 +21,7 @@ import ProgressTracker from './components/ProgressTracker';
 import BottomNav from './components/BottomNav';
 import RestockAlert from './components/RestockAlert';
 import ErrorRecovery from './components/ErrorRecovery';
-import { analyzeImage, sendAction, getInventory } from './api';
+import { analyzeImage, sendAction, getInventory, generateRecipeFromInventory } from './api';
 import './App.css';
 
 /* ---------- localStorage helpers ---------- */
@@ -49,7 +49,7 @@ const initialState = {
   groceryPref: loadState('eathos_grocery_pref', null),
 
   phase: 'upload',
-  sessionId: null,
+  sessionId: loadState('eathos_sessionId', null),
   inventory: loadState('eathos_inventory', []),
   fridgeImage: loadState('eathos_fridgeImage', null),
   recipe: null,
@@ -101,6 +101,7 @@ function reducer(state, action) {
     case 'SET_INVENTORY': {
       const newInv = action.inventory;
       saveState('eathos_inventory', newInv);
+      saveState('eathos_sessionId', action.sessionId);
       if (action.fridgeImage) {
         saveState('eathos_fridgeImage', action.fridgeImage);
       }
@@ -117,9 +118,12 @@ function reducer(state, action) {
     case 'START_RECIPE':
       return {
         ...state, phase: 'generating',
-        agentSteps: state.agentSteps.map(s =>
-          s.id === 'nutritionist' ? { ...s, status: 'active', summary: 'Crafting the perfect recipe...' } : s
-        ),
+        agentSteps: state.agentSteps.map(s => {
+          if (s.id === 'analyzer' && state.inventory?.length > 0) return { ...s, status: 'complete', summary: `Found ${state.inventory.length} items` };
+          if (s.id === 'inventory' && state.inventory?.length > 0) return { ...s, status: 'complete', summary: 'Inventory synced' };
+          if (s.id === 'nutritionist') return { ...s, status: 'active', summary: 'Crafting the perfect recipe...' };
+          return s;
+        }),
       };
     case 'SET_RECIPE':
       return {
@@ -350,7 +354,7 @@ function RecipeFlow({ state, dispatch }) {
   const handleAccept = useCallback(async () => {
     dispatch({ type: 'START_ACCEPT' });
     try {
-      const result = await sendAction(state.sessionId, 'accept_recipe');
+      const result = await sendAction(state.sessionId, 'accept_recipe', { recipe: state.recipe });
       const finalEvent = result.events.find(e => e.action === 'final_output');
       if (finalEvent) {
         dispatch({ type: 'ACCEPT_RECIPE', imageUrl: finalEvent.image_url });
@@ -363,7 +367,7 @@ function RecipeFlow({ state, dispatch }) {
   const handleReject = useCallback(async () => {
     dispatch({ type: 'REJECT_RECIPE' });
     try {
-      const result = await sendAction(state.sessionId, 'reject_recipe');
+      const result = await sendAction(state.sessionId, 'reject_recipe', { recipe: state.recipe });
       const recipeEvent = result.events.find(e => e.action === 'review_recipe');
       const freeInputEvent = result.events.find(e => e.action === 'free_input');
       if (recipeEvent) dispatch({ type: 'SET_RECIPE', recipe: recipeEvent.recipe });
@@ -376,7 +380,10 @@ function RecipeFlow({ state, dispatch }) {
   const handleFreeInput = useCallback(async (text) => {
     dispatch({ type: 'START_RECIPE' });
     try {
-      const result = await sendAction(state.sessionId, 'free_input', { user_input: text });
+      const result = await sendAction(state.sessionId, 'free_input', { 
+        user_input: text,
+        recipe: state.recipe 
+      });
       const recipeEvent = result.events.find(e => e.action === 'review_recipe');
       if (recipeEvent) dispatch({ type: 'SET_RECIPE', recipe: recipeEvent.recipe });
     } catch (err) {
@@ -511,6 +518,41 @@ function AppRoutes() {
                     userProfile={state.userProfile}
                     preferences={state.preferences}
                     mealHistory={state.mealHistory}
+                    inventory={state.inventory}
+                    sessionId={state.sessionId}
+                    onGenerateRecipe={async () => {
+                      if (state.inventory.length === 0) {
+                        navigate('/scan');
+                        return;
+                      }
+                      // Ensure we have a session — create one if needed
+                      let sid = state.sessionId;
+                      if (!sid) {
+                        try {
+                          const res = await fetch('http://localhost:8000/api/session/new', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+                          const data = await res.json();
+                          sid = data.session_id;
+                          dispatch({ type: 'SET_INVENTORY', sessionId: sid, inventory: state.inventory });
+                        } catch (err) {
+                          dispatch({ type: 'SET_ERROR', error: 'Failed to start session' });
+                          return;
+                        }
+                      }
+                      dispatch({ type: 'START_RECIPE' });
+                      navigate('/recipe');
+                      try {
+                        const data = await generateRecipeFromInventory(state.inventory, state.preferences);
+                        if (data && data.recipe) {
+                          dispatch({ type: 'SET_RECIPE', recipe: data.recipe });
+                        } else {
+                          console.warn('[ChatRecipe] Invalid recipe response:', data);
+                          dispatch({ type: 'SET_ERROR', error: 'Recipe generation did not return a valid recipe. Please try again.' });
+                        }
+                      } catch (err) {
+                        console.error('[ChatRecipe] Error:', err);
+                        dispatch({ type: 'SET_ERROR', error: err.message });
+                      }
+                    }}
                   />
                 } />
                 <Route path="/recap" element={

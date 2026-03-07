@@ -160,7 +160,12 @@ async def user_action(action: UserAction):
         app_name="fridge-recipe", user_id="user", session_id=session_id
     )
     if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
+        print(f"[ACTION] Session {session_id} not found (likely server restart). Recreating.")
+        session = await session_service.create_session(
+            app_name="fridge-recipe", user_id="user"
+        )
+        session_id = session.id
+        _sessions[session_id] = session
 
     # Set the phase based on user action
     if action.action == "confirm_inventory":
@@ -171,10 +176,18 @@ async def user_action(action: UserAction):
             session.state["dietary_preferences"] = action.data["dietary_preferences"]
     elif action.action == "accept_recipe":
         session.state["phase"] = "accept_recipe"
+        if action.data and "recipe" in action.data:
+            session.state["recipe"] = action.data["recipe"]
     elif action.action == "reject_recipe":
         session.state["phase"] = "reject_recipe"
+        if action.data and "recipe" in action.data:
+            session.state["recipe"] = action.data["recipe"]
+        if action.data and "rejected_recipes" in action.data:
+            session.state["rejected_recipes"] = json.dumps(action.data["rejected_recipes"])
     elif action.action == "free_input":
         session.state["phase"] = "generate_recipe"
+        if action.data and "recipe" in action.data:
+            session.state["recipe"] = action.data["recipe"]
         if action.data and "user_input" in action.data:
             session.state["dietary_preferences"] = action.data["user_input"]
 
@@ -246,6 +259,86 @@ async def chat(body: ChatRequest):
         reply = "Sorry, I'm having trouble right now. Please try again."
 
     return {"reply": reply}
+
+
+class RecipeGenerateRequest(BaseModel):
+    """Request body for direct recipe generation from inventory."""
+    inventory: list
+    preferences: Optional[dict] = None
+
+
+@app.post("/api/recipe/generate")
+async def generate_recipe(body: RecipeGenerateRequest):
+    """Generate a recipe directly from inventory — no session needed."""
+    from google import genai
+
+    client = genai.Client()
+
+    # Build the prompt matching the nutritionist agent's format
+    inv_str = json.dumps(body.inventory, indent=2)
+    prefs = body.preferences or {}
+    prefs_str = json.dumps(prefs) if prefs else "None specified"
+
+    prompt = f"""You are a Nutritionist agent. You receive the user's full kitchen 
+    inventory and must suggest a recipe.
+
+    **Prioritization rules (in order):**
+    1. USE EXPIRING ITEMS FIRST. If an item has days_until_expiry <= 2, it MUST be 
+       in the recipe. This is the #1 priority.
+    2. Maximize use of available inventory items — minimize "you need to buy" ingredients.
+    3. Balance nutrition: aim for protein + vegetables + carbs.
+    4. Keep it practical: prefer recipes under 45 minutes for weeknight cooking.
+
+    **Current inventory:** {inv_str}
+    **Dietary preferences:** {prefs_str}
+
+    **Your reasoning section must explicitly state:**
+    - Which items are expiring and how you used them
+    - Why this cuisine/preparation was chosen
+    - Any nutritional considerations
+
+    For each ingredient, set from_inventory to true if the ingredient is available
+    in the user's inventory, or false if the user would need to buy it.
+
+    Respond ONLY with valid JSON in this exact schema:
+    {{
+      "title": "string",
+      "cuisine": "string",
+      "difficulty": "easy|medium|hard",
+      "prep_time_minutes": number,
+      "cook_time_minutes": number,
+      "servings": number,
+      "ingredients": [
+        {{"name": "string", "quantity": number, "unit": "string", "from_inventory": boolean}}
+      ],
+      "steps": ["step 1", "step 2", ...],
+      "reasoning": "string explaining why this recipe",
+      "nutrition": {{
+        "calories": number,
+        "protein_g": number,
+        "carbs_g": number,
+        "fat_g": number
+      }},
+      "nutritional_gaps": "string or null"
+    }}"""
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-3.1-pro-preview",
+            contents=[types.Content(
+                role="user",
+                parts=[types.Part(text=prompt)],
+            )],
+            config=types.GenerateContentConfig(
+                temperature=0.7,
+                response_mime_type="application/json",
+            ),
+        )
+        recipe = json.loads(response.text)
+        return {"recipe": recipe}
+    except Exception as e:
+        print(f"[RECIPE GENERATE ERROR] {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/api/inventory/{session_id}")

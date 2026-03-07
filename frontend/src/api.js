@@ -60,3 +60,17 @@ export async function getInventory(sessionId) {
 
   return response.json();
 }
+
+export async function generateRecipeFromInventory(inventory, preferences = null) {
+  const response = await fetch(`${BASE_URL}/api/recipe/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ inventory, preferences }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Recipe generation failed: ${response.status}`);
+  }
+
+  return response.json();
+}
