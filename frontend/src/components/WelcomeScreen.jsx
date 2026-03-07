@@ -15,15 +15,15 @@ export default function WelcomeScreen() {
         <EathosLogo size={80} color="white" bgColor="var(--color-primary)" className="welcome-logo" />
 
         <h1 className="welcome-wordmark">Eathos</h1>
-        <p className="welcome-tagline">AI Wellness Coach &middot; Fridge to Table</p>
+        <p className="welcome-tagline">AI Nutritionist &middot; Fridge to Table</p>
 
         <div className="welcome-slogan">
           Eat with <em>intention.</em>
         </div>
 
         <p className="welcome-description">
-          Your personal nutrition coach that adapts to your day, your goals,
-          your pantry, and whatever just changed on your calendar.
+          Healthy eating isn't about the perfect plan. It's about making
+          better decisions, all day. That's Eathos.
         </p>
 
         <button

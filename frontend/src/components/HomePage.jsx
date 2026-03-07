@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Camera, ShoppingCart, BarChart3, ChevronRight } from 'lucide-react';
+import { Camera, ShoppingCart, BarChart3, ChevronRight, Sparkles } from 'lucide-react';
 import './HomePage.css';
 
 function getGreeting() {
@@ -21,7 +21,7 @@ export default function HomePage({ userProfile, inventory, mealHistory }) {
   const navigate = useNavigate();
   const greeting = getGreeting();
   const suggestion = getMealSuggestion();
-  const userName = userProfile?.name || 'there';
+  const userName = userProfile?.profile?.name || userProfile?.name || 'there';
 
   const recentMeal = mealHistory?.[mealHistory.length - 1];
   const inventoryCount = inventory?.length || 0;
@@ -34,7 +34,18 @@ export default function HomePage({ userProfile, inventory, mealHistory }) {
       </div>
 
       <div className="home-cards">
-        <button className="home-card home-card-primary" onClick={() => navigate('/scan')}>
+        <button className="home-card home-card-primary" onClick={() => navigate('/chat')}>
+          <div className="home-card-icon">
+            <Sparkles size={28} strokeWidth={1.5} />
+          </div>
+          <div className="home-card-text">
+            <h3>Chat with AI Nutritionist</h3>
+            <p>Get personalized nutrition advice, trade off recommendations, and snack recommendations</p>
+          </div>
+          <ChevronRight size={20} className="home-card-arrow" />
+        </button>
+
+        <button className="home-card" onClick={() => navigate('/scan')}>
           <div className="home-card-icon">
             <Camera size={28} strokeWidth={1.5} />
           </div>
@@ -46,17 +57,17 @@ export default function HomePage({ userProfile, inventory, mealHistory }) {
         </button>
 
         <div className="home-cards-row">
-          <button className="home-card home-card-accent" onClick={() => navigate('/shopping')}>
+          <button className="home-card" onClick={() => navigate('/shopping')}>
             <div className="home-card-icon">
               <ShoppingCart size={24} strokeWidth={1.5} />
             </div>
             <div className="home-card-text">
               <h3>Shopping List</h3>
-              <p>{inventoryCount > 0 ? `${inventoryCount} items tracked` : 'Start tracking'}</p>
+              <p>{inventoryCount > 0 ? `${inventoryCount} items tracked` : 'Start Shopping'}</p>
             </div>
           </button>
 
-          <button className="home-card home-card-berry" onClick={() => navigate('/tracker')}>
+          <button className="home-card" onClick={() => navigate('/tracker')}>
             <div className="home-card-icon">
               <BarChart3 size={24} strokeWidth={1.5} />
             </div>

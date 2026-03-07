@@ -36,6 +36,21 @@ export async function sendAction(sessionId, action, data = null) {
   return response.json();
 }
 
+export async function chatWithNutritionist(systemPrompt, messages) {
+  const response = await fetch(`${BASE_URL}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ system: systemPrompt, messages }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Chat failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.reply;
+}
+
 export async function getInventory(sessionId) {
   const response = await fetch(`${BASE_URL}/api/inventory/${sessionId}`);
 

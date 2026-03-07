@@ -2,16 +2,60 @@ import { useState, useRef } from 'react';
 import { Camera, Send } from 'lucide-react';
 import './QuickLog.css';
 
+const MEAL_KEYWORDS = {
+  breakfast: ['breakfast', 'morning', 'cereal', 'oatmeal', 'eggs', 'toast', 'pancake', 'waffle', 'bagel', 'smoothie', 'yogurt', 'granola', 'coffee'],
+  lunch: ['lunch', 'sandwich', 'salad', 'wrap', 'soup', 'midday', 'noon', 'burrito'],
+  snack: ['snack', 'cookie', 'chips', 'fruit', 'nuts', 'bar', 'crackers', 'popcorn', 'trail mix', 'apple', 'banana', 'granola bar'],
+  dinner: ['dinner', 'supper', 'evening', 'steak', 'pasta', 'rice', 'chicken', 'fish', 'pizza', 'curry', 'stir fry', 'tacos'],
+};
+
+function detectMealType(text) {
+  const lower = text.toLowerCase();
+
+  for (const keyword of ['breakfast', 'lunch', 'dinner', 'supper', 'snack']) {
+    if (lower.includes(keyword)) {
+      return keyword === 'supper' ? 'dinner' : keyword;
+    }
+  }
+
+  let bestMatch = null;
+  let bestScore = 0;
+  for (const [type, keywords] of Object.entries(MEAL_KEYWORDS)) {
+    const score = keywords.filter(kw => lower.includes(kw)).length;
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatch = type;
+    }
+  }
+
+  return bestMatch;
+}
+
+const MEAL_LABELS = { breakfast: 'Breakfast', lunch: 'Lunch', snack: 'Snack', dinner: 'Dinner' };
+
 export default function QuickLog({ onLog }) {
   const [name, setName] = useState('');
   const [photo, setPhoto] = useState(null);
   const [calories, setCalories] = useState('');
+  const [mealType, setMealType] = useState(null);
+  const [showMealPicker, setShowMealPicker] = useState(false);
   const fileRef = useRef(null);
 
   const handleSubmit = () => {
     if (!name.trim()) return;
-    const hour = new Date().getHours();
-    const type = hour < 10 ? 'breakfast' : hour < 14 ? 'lunch' : hour < 17 ? 'snack' : 'dinner';
+
+    const detected = detectMealType(name);
+
+    if (detected) {
+      submitLog(detected);
+    } else if (mealType) {
+      submitLog(mealType);
+    } else {
+      setShowMealPicker(true);
+    }
+  };
+
+  const submitLog = (type) => {
     onLog({
       name: name.trim(),
       photo,
@@ -27,6 +71,14 @@ export default function QuickLog({ onLog }) {
     setName('');
     setPhoto(null);
     setCalories('');
+    setMealType(null);
+    setShowMealPicker(false);
+  };
+
+  const handleNameChange = (e) => {
+    setName(e.target.value);
+    setShowMealPicker(false);
+    setMealType(null);
   };
 
   return (
@@ -39,8 +91,8 @@ export default function QuickLog({ onLog }) {
           <input
             type="text"
             value={name}
-            onChange={e => setName(e.target.value)}
-            placeholder="What did you eat?"
+            onChange={handleNameChange}
+            placeholder="What did you eat? e.g. turkey sandwich for lunch"
             className="quick-log-input"
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
           />
@@ -63,6 +115,23 @@ export default function QuickLog({ onLog }) {
           const f = e.target.files[0];
           if (f) setPhoto(URL.createObjectURL(f));
         }} style={{ display: 'none' }} />
+
+        {showMealPicker && (
+          <div className="quick-log-meal-picker">
+            <p className="meal-picker-prompt">Which meal was this for?</p>
+            <div className="meal-picker-options">
+              {Object.entries(MEAL_LABELS).map(([key, label]) => (
+                <button
+                  key={key}
+                  className={`meal-picker-btn ${mealType === key ? 'selected' : ''}`}
+                  onClick={() => { setMealType(key); setShowMealPicker(false); submitLog(key); }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <button className="btn btn-primary" onClick={handleSubmit} disabled={!name.trim()}>
           <Send size={16} /> Log It
