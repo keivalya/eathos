@@ -6,13 +6,17 @@ Endpoints:
   GET  /api/inventory/{session_id} — Get current inventory for a session
 """
 
+# IMPORTANT: Load .env BEFORE any ADK/genai imports so the API key is available
+from pathlib import Path as _Path
+from dotenv import load_dotenv
+load_dotenv(_Path(__file__).parent / ".env", override=True)
+
 import json
 import os
 from contextlib import asynccontextmanager
 from typing import Optional
 
 import uvicorn
-from dotenv import load_dotenv
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from google.adk.runners import Runner
@@ -21,9 +25,6 @@ from google.genai import types
 from pydantic import BaseModel
 
 from .agent import root_agent
-
-# Load environment variables from .env
-load_dotenv()
 
 # --- Session Management ---
 session_service = InMemorySessionService()
