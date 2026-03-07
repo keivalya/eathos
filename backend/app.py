@@ -74,16 +74,21 @@ class UserAction(BaseModel):
 @app.post("/api/analyze")
 async def analyze_fridge(image: UploadFile = File(...)):
     """Upload a fridge photo to start a new session."""
+    print("\n" + "=" * 60)
+    print("[ANALYZE] Starting new analysis...")
+
     # Create a new session
     session = await session_service.create_session(
         app_name="fridge-recipe", user_id="user"
     )
     session_id = session.id
     _sessions[session_id] = session
+    print(f"[ANALYZE] Session created: {session_id}")
 
     # Read raw image bytes for the vision model
     image_bytes = await image.read()
     mime_type = image.content_type or "image/jpeg"
+    print(f"[ANALYZE] Image received: {len(image_bytes)} bytes, type={mime_type}")
 
     # Save the uploaded image locally for persistence
     ext = mime_type.split("/")[-1] if "/" in mime_type else "jpg"
@@ -108,16 +113,39 @@ async def analyze_fridge(image: UploadFile = File(...)):
     )
 
     events = []
+    event_count = 0
     async for event in runner.run_async(
         session_id=session_id, user_id="user", new_message=user_message
     ):
+        event_count += 1
+        print(f"\n[EVENT #{event_count}] author={event.author}")
+        if event.actions and event.actions.state_delta:
+            print(f"  [STATE_DELTA] keys={list(event.actions.state_delta.keys())}")
+            for k, v in event.actions.state_delta.items():
+                preview = str(v)[:200] if v else "None"
+                print(f"    {k} = {preview}")
         if event.content and event.content.parts:
             for part in event.content.parts:
                 if part.text:
+                    print(f"  [TEXT] {part.text[:300]}...")
                     try:
-                        events.append(json.loads(part.text))
+                        parsed = json.loads(part.text)
+                        events.append(parsed)
+                        print(f"  [PARSED] action={parsed.get('action', 'N/A')}")
                     except json.JSONDecodeError:
                         events.append({"text": part.text})
+                        print(f"  [RAW TEXT] (not JSON)")
+
+    # Log final session state
+    print(f"\n[SESSION STATE after analyze]")
+    for k, v in session.state.items():
+        preview = str(v)[:200] if v else "None"
+        print(f"  {k} = {preview}")
+
+    print(f"\n[ANALYZE] Total events collected: {len(events)}")
+    for i, ev in enumerate(events):
+        print(f"  event[{i}] action={ev.get('action', 'N/A')}, keys={list(ev.keys())}")
+    print("=" * 60 + "\n")
 
     return {"session_id": session_id, "events": events}
 

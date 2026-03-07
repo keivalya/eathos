@@ -20,14 +20,20 @@ import ProgressTracker from './components/ProgressTracker';
 import BottomNav from './components/BottomNav';
 import RestockAlert from './components/RestockAlert';
 import ErrorRecovery from './components/ErrorRecovery';
-import { analyzeImage, sendAction } from './api';
+import { analyzeImage, sendAction, getInventory } from './api';
 import './App.css';
 
 /* ---------- localStorage helpers ---------- */
 function loadState(key, fallback) {
   try {
     const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
+    if (!raw) return fallback;
+    let parsed = JSON.parse(raw);
+    // Handle double-encoded JSON strings (backend stores inventory as json.dumps)
+    if (typeof parsed === 'string') {
+      try { parsed = JSON.parse(parsed); } catch { }
+    }
+    return parsed;
   } catch { return fallback; }
 }
 
@@ -201,18 +207,41 @@ function ScanFlow({ state, dispatch }) {
   const handleUpload = useCallback(async (file) => {
     dispatch({ type: 'START_ANALYSIS' });
     try {
+      console.log('[ScanFlow] Uploading image...', file.name, file.size, 'bytes');
       const result = await analyzeImage(file);
+      console.log('[ScanFlow] analyzeImage result:', JSON.stringify(result, null, 2));
+
       const inventoryEvent = result.events.find(e => e.action === 'review_inventory');
+      console.log('[ScanFlow] inventoryEvent found:', !!inventoryEvent);
+
       if (inventoryEvent) {
-        // Fetch the full inventory state to get the saved fridge_image_url
-        const inventoryState = await getInventory(result.session_id);
-        const items = inventoryState.inventory || [];
-        const fridgeImage = inventoryState.fridge_image_url || null;
+        // The inventory comes from the event directly.
+        // sync_inventory_tool returns {"inventory": [...]}, so unwrap if needed.
+        let rawInv = inventoryEvent.inventory;
+        console.log('[ScanFlow] rawInv:', rawInv);
+
+        // Unwrap nested {"inventory": [...]} wrapper from sync_inventory_tool
+        let items = [];
+        if (Array.isArray(rawInv)) {
+          items = rawInv;
+        } else if (rawInv && Array.isArray(rawInv.inventory)) {
+          items = rawInv.inventory;
+        }
+        console.log('[ScanFlow] items:', items.length, 'items');
+
+        // Also try to get fridge image URL from the event or session
+        let fridgeImage = null;
+        try {
+          const invState = await getInventory(result.session_id);
+          fridgeImage = invState.fridge_image_url || null;
+        } catch { /* ignore - fridge image is nice-to-have */ }
 
         if (items.length === 0) {
+          console.warn('[ScanFlow] Zero items detected!');
           dispatch({ type: 'SET_ERROR', error: 'zero_items' });
           return;
         }
+        console.log('[ScanFlow] Dispatching SET_INVENTORY with', items.length, 'items');
         dispatch({
           type: 'SET_INVENTORY',
           sessionId: result.session_id,
@@ -221,9 +250,11 @@ function ScanFlow({ state, dispatch }) {
         });
         navigate('/inventory');
       } else {
+        console.error('[ScanFlow] No review_inventory event found!');
         dispatch({ type: 'SET_ERROR', error: 'upload_failed' });
       }
     } catch (err) {
+      console.error('[ScanFlow] Error:', err);
       dispatch({ type: 'SET_ERROR', error: navigator.onLine ? 'upload_failed' : 'network' });
     }
   }, [dispatch, navigate]);
@@ -274,12 +305,14 @@ function InventoryFlow({ state, dispatch }) {
     }
   }, [state.sessionId, state.inventory, state.preferences, dispatch, navigate]);
 
+  const items = Array.isArray(state.inventory) ? state.inventory : [];
+
   return (
     <InventoryGrid
-      items={state.inventory}
+      items={items}
       onConfirm={handleConfirm}
-      onRemoveItem={(name) => dispatch({ type: 'UPDATE_INVENTORY', inventory: state.inventory.filter(i => i.name !== name) })}
-      onAddItem={(item) => dispatch({ type: 'UPDATE_INVENTORY', inventory: [...state.inventory, item] })}
+      onRemoveItem={(name) => dispatch({ type: 'UPDATE_INVENTORY', inventory: items.filter(i => i.name !== name) })}
+      onAddItem={(item) => dispatch({ type: 'UPDATE_INVENTORY', inventory: [...items, item] })}
     />
   );
 }
@@ -387,7 +420,8 @@ function AppRoutes() {
     navigate('/home');
   }, [navigate]);
 
-  const lowItems = state.inventory
+  const inv = Array.isArray(state.inventory) ? state.inventory : [];
+  const lowItems = inv
     .filter(i => i.days_until_expiry != null && i.days_until_expiry <= 3)
     .map(i => i.name);
 
