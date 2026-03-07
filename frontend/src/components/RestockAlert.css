@@ -27,6 +27,13 @@
   font-weight: var(--weight-medium);
 }
 
+.restock-actions-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+}
+
 .restock-action {
   display: inline-flex;
   align-items: center;
@@ -36,4 +43,20 @@
   color: var(--color-saffron-dark);
   background: none;
   white-space: nowrap;
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.restock-action:hover {
+  opacity: 0.8;
+}
+
+.restock-action:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.text-green {
+  color: var(--color-forest-light);
 }

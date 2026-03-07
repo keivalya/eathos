@@ -207,6 +207,14 @@ function reducer(state, action) {
       saveState('eathos_shopping', list);
       return { ...state, shoppingList: list };
     }
+    case 'ADD_SHOPPING_ITEMS': {
+      // Avoid duplicates by name (case-insensitive)
+      const existingNames = new Set(state.shoppingList.map(i => i.name.toLowerCase()));
+      const newItems = action.items.filter(i => !existingNames.has(i.name.toLowerCase()));
+      const list = [...state.shoppingList, ...newItems];
+      saveState('eathos_shopping', list);
+      return { ...state, shoppingList: list };
+    }
     case 'REMOVE_SHOPPING_ITEM': {
       const list = state.shoppingList.filter(i => i.name !== action.name);
       saveState('eathos_shopping', list);
@@ -391,6 +399,17 @@ function RecipeFlow({ state, dispatch }) {
     }
   }, [state.sessionId, dispatch]);
 
+  const handleAddToCart = useCallback((items) => {
+    // Map missing ingredients to standard shopping list format
+    const shoppingItems = items.map(item => ({
+      name: item.name,
+      quantity: `${item.quantity} ${item.unit}`,
+      category: item.category || 'other',
+      checked: false
+    }));
+    dispatch({ type: 'ADD_SHOPPING_ITEMS', items: shoppingItems });
+  }, [dispatch]);
+
   if (state.error === 'recipe_failed' || (state.error && state.error !== 'free_input' && state.phase === 'generating')) {
     return (
       <ErrorRecovery
@@ -425,6 +444,7 @@ function RecipeFlow({ state, dispatch }) {
         onAccept={handleAccept}
         onReject={handleReject}
         onFreeInput={handleFreeInput}
+        onAddToCart={handleAddToCart}
       />
       {state.phase === 'accepted' && !state.showMealLogger && (
         <div style={{ textAlign: 'center', marginTop: 'var(--space-4)' }}>
@@ -457,8 +477,11 @@ function AppRoutes() {
   }, [navigate]);
 
   const inv = Array.isArray(state.inventory) ? state.inventory : [];
+  const shoppingListNames = new Set(state.shoppingList.map(i => i.name.toLowerCase()));
+  
   const lowItems = inv
     .filter(i => i.days_until_expiry != null && i.days_until_expiry <= 3)
+    .filter(i => !shoppingListNames.has(i.name.toLowerCase()))
     .map(i => i.name);
 
   const showShell = state.hasOnboarded;
@@ -483,7 +506,18 @@ function AppRoutes() {
               <Routes>
                 <Route path="/home" element={
                   <>
-                    {lowItems.length > 0 && <RestockAlert lowItems={lowItems} />}
+                    {lowItems.length > 0 && <RestockAlert 
+                      lowItems={lowItems} 
+                      onAddAllToCart={() => {
+                        const items = lowItems.map(name => ({
+                          name,
+                          quantity: '1',
+                          category: 'restock',
+                          checked: false
+                        }));
+                        dispatch({ type: 'ADD_SHOPPING_ITEMS', items });
+                      }}
+                    />}
                     <HomePage
                       userProfile={state.userProfile}
                       inventory={state.inventory}
