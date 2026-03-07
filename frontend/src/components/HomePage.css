@@ -78,11 +78,9 @@
   box-shadow: var(--shadow-glow-primary);
 }
 
-.home-card-accent .home-card-icon { color: var(--color-accent); }
-.home-card-berry .home-card-icon { color: var(--color-berry); }
-
 .home-card-icon {
   flex-shrink: 0;
+  color: var(--color-ink-mid);
 }
 
 .home-card-text {

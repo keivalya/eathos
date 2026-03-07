@@ -46,22 +46,11 @@
   max-width: 320px;
 }
 
-/* Groups */
-.shopping-groups {
+/* Items */
+.shopping-items {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
   margin-bottom: var(--space-6);
-}
-
-.shopping-group h3 {
-  font-family: var(--font-body);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
-  color: var(--color-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin-bottom: var(--space-2);
 }
 
 .shopping-item {
@@ -70,7 +59,6 @@
   gap: var(--space-3);
   padding: var(--space-3) 0;
   border-bottom: 1px solid var(--color-surface);
-  cursor: pointer;
   transition: opacity var(--transition-fast);
 }
 
@@ -92,6 +80,7 @@
   justify-content: center;
   flex-shrink: 0;
   transition: all var(--transition-fast);
+  cursor: pointer;
 }
 
 .shopping-check.is-checked {
@@ -112,11 +101,41 @@
   font-family: var(--font-mono);
 }
 
-/* Add */
+.shopping-remove-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-ink-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.shopping-item:hover .shopping-remove-btn {
+  opacity: 1;
+}
+
+.shopping-remove-btn:hover {
+  background: var(--color-berry-wash);
+  color: var(--color-berry);
+}
+
+/* Actions */
+.shopping-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
 .shopping-add-row {
   display: flex;
   gap: var(--space-2);
-  margin-bottom: var(--space-4);
 }
 
 .shopping-add-input {
@@ -127,10 +146,12 @@
   font-size: var(--text-sm);
   color: var(--color-ink);
   background: var(--color-bg-warm);
+  font-family: var(--font-body);
 }
 
 .shopping-add-input:focus {
   border-color: var(--color-primary);
+  outline: none;
 }
 
 .shopping-instacart {
@@ -139,8 +160,26 @@
   border-radius: var(--radius-full);
 }
 
+/* All done */
+.shopping-all-done {
+  text-align: center;
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+  background: var(--color-primary-wash);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(106, 171, 94, 0.15);
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-style: italic;
+  color: var(--color-primary-dark);
+}
+
 @media (max-width: 768px) {
   .shopping-list {
     padding-bottom: calc(var(--bottom-nav-height) + var(--space-6));
+  }
+
+  .shopping-remove-btn {
+    opacity: 1;
   }
 }

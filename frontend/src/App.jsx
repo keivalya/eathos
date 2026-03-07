@@ -15,6 +15,7 @@ import DietaryPreferencesModal from './components/DietaryPreferencesModal';
 import MealLogger from './components/MealLogger';
 import ShoppingList from './components/ShoppingList';
 import MealTracker from './components/MealTracker';
+import NutritionistChat from './components/NutritionistChat';
 import EndOfDayRecap from './components/EndOfDayRecap';
 import ProgressTracker from './components/ProgressTracker';
 import BottomNav from './components/BottomNav';
@@ -65,10 +66,18 @@ const initialState = {
 
 function reducer(state, action) {
   switch (action.type) {
-    case 'COMPLETE_ONBOARDING':
+    case 'COMPLETE_ONBOARDING': {
       saveState('eathos_onboarded', true);
       saveState('eathos_profile', action.profile);
-      return { ...state, hasOnboarded: true, userProfile: action.profile };
+      const prefs = action.profile?.preferences;
+      if (prefs) saveState('eathos_preferences', prefs);
+      return {
+        ...state,
+        hasOnboarded: true,
+        userProfile: action.profile,
+        ...(prefs ? { preferences: prefs } : {}),
+      };
+    }
     case 'SET_GROCERY_PREF':
       saveState('eathos_grocery_pref', action.pref);
       return { ...state, groceryPref: action.pref };
@@ -149,6 +158,18 @@ function reducer(state, action) {
       saveState('eathos_meals', meals);
       return { ...state, mealHistory: meals, showMealLogger: false };
     }
+    case 'EDIT_MEAL': {
+      const meals = state.mealHistory.map(m =>
+        m.loggedAt === action.loggedAt ? { ...m, ...action.updated } : m
+      );
+      saveState('eathos_meals', meals);
+      return { ...state, mealHistory: meals };
+    }
+    case 'DELETE_MEAL': {
+      const meals = state.mealHistory.filter(m => m.loggedAt !== action.loggedAt);
+      saveState('eathos_meals', meals);
+      return { ...state, mealHistory: meals };
+    }
 
     case 'UPDATE_SHOPPING': {
       saveState('eathos_shopping', action.list);
@@ -163,6 +184,11 @@ function reducer(state, action) {
     }
     case 'ADD_SHOPPING_ITEM': {
       const list = [...state.shoppingList, action.item];
+      saveState('eathos_shopping', list);
+      return { ...state, shoppingList: list };
+    }
+    case 'REMOVE_SHOPPING_ITEM': {
+      const list = state.shoppingList.filter(i => i.name !== action.name);
       saveState('eathos_shopping', list);
       return { ...state, shoppingList: list };
     }
@@ -415,12 +441,24 @@ function AppRoutes() {
                     items={state.shoppingList}
                     onToggle={(name) => dispatch({ type: 'TOGGLE_SHOPPING_ITEM', name })}
                     onAdd={(item) => dispatch({ type: 'ADD_SHOPPING_ITEM', item })}
+                    onRemove={(name) => dispatch({ type: 'REMOVE_SHOPPING_ITEM', name })}
                   />
                 } />
                 <Route path="/tracker" element={
                   <MealTracker
                     meals={state.mealHistory}
                     onQuickLog={(meal) => dispatch({ type: 'LOG_MEAL', meal })}
+                    onEditMeal={(loggedAt, updated) => dispatch({ type: 'EDIT_MEAL', loggedAt, updated })}
+                    onDeleteMeal={(loggedAt) => dispatch({ type: 'DELETE_MEAL', loggedAt })}
+                    onSubmitCheckin={(recap) => dispatch({ type: 'SUBMIT_RECAP', recap })}
+                    checkinHistory={state.recapHistory}
+                  />
+                } />
+                <Route path="/chat" element={
+                  <NutritionistChat
+                    userProfile={state.userProfile}
+                    preferences={state.preferences}
+                    mealHistory={state.mealHistory}
                   />
                 } />
                 <Route path="/recap" element={
