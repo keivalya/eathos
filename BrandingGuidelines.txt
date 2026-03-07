@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eathos — Concept A · Citrus & Cream</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ── CONCEPT A: CITRUS & CREAM ── */
+    /* Background: clean white / warm grey */
+    --bg:          #FFFFFF;
+    --bg-warm:     #F8F7F4;
+    --surface:     #F2F0EC;
+    --border:      #E4E0D8;
+
+    /* Primary: Saffron / Turmeric gold */
+    --primary:     #6AAB5E;
+    --primary-dk:  #4A8040;
+    --primary-lt:  #A8D4A0;
+    --primary-wash:#EEF7EC;
+
+    /* Secondary: Lime / Herb green */
+    --secondary:   #6AAB5E;
+    --secondary-lt:#C2E0BB;
+    --secondary-wash:#EEF7EC;
+
+    /* Accent: Blood orange */
+    --accent:      #E05A2B;
+    --accent-lt:   #F5B09A;
+    --accent-wash: #FEF0EB;
+
+    /* Berry pop */
+    --berry:       #C4446A;
+    --berry-lt:    #ECA8BE;
+    --berry-wash:  #FCEEF4;
+
+    /* Lemon */
+    --lemon:       #E8D44A;
+    --lemon-wash:  #FEFBE8;
+
+    /* Text */
+    --ink:         #2A2520;
+    --ink-mid:     #5A534A;
+    --ink-lt:      #9A9088;
+
+    --font-display:'Cormorant Garamond', serif;
+    --font-heading:'Playfair Display', serif;
+    --font-body:   'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-weight: 300; line-height: 1.6; }
+
+  /* ── CONCEPT BANNER ── */
+  .concept-banner {
+    background: var(--primary);
+    color: white;
+    text-align: center;
+    padding: 14px 40px;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 60px 40px; }
+  .section { margin-bottom: 72px; }
+  .section-label {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--primary); margin-bottom: 28px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--bg-warm);
+    border: 1px solid var(--border);
+    border-radius: 32px;
+    padding: 72px 60px;
+    margin-bottom: 72px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -80px; right: -80px;
+    width: 360px; height: 360px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,146,42,0.12) 0%, transparent 70%);
+  }
+  .hero::after {
+    content: ''; position: absolute; bottom: -60px; left: 20%;
+    width: 280px; height: 280px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,68,106,0.08) 0%, transparent 70%);
+  }
+
+  .hero-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--primary); margin-bottom: 28px; }
+
+  .logo-lockup { display: flex; align-items: center; gap: 18px; margin-bottom: 28px; }
+  .logo-mark {
+    width: 60px; height: 60px; background: var(--primary);
+    border-radius: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .logo-mark svg { width: 36px; height: 36px; }
+
+  .logo-wordmark { font-family: var(--font-display); font-size: 68px; font-weight: 300; color: var(--ink); letter-spacing: -0.01em; line-height: 1; }
+
+  .logo-tagline { font-size: 13px; color: var(--ink-mid); letter-spacing: 0.05em; margin-bottom: 44px; }
+
+  .slogan-primary { font-family: var(--font-display); font-size: 40px; font-weight: 300; font-style: italic; color: var(--ink); line-height: 1.2; max-width: 520px; margin-bottom: 14px; }
+  .slogan-primary em { font-style: normal; color: var(--primary); }
+  .slogan-sub { font-size: 14px; color: var(--ink-mid); font-weight: 300; letter-spacing: 0.04em; }
+
+  /* ── PALETTE ── */
+  .palette-row { display: grid; grid-template-columns: repeat(10, 1fr); border-radius: 20px; overflow: hidden; height: 100px; margin-bottom: 28px; }
+  .swatch { display: flex; flex-direction: column; justify-content: flex-end; padding: 8px 6px; transition: flex 0.3s; cursor: default; }
+  .swatch:hover { flex: 2; }
+  .swatch-name { font-size: 8px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; }
+  .swatch-hex { font-size: 8px; opacity: 0.7; }
+
+  .palette-specs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .spec-card { background: var(--bg-warm); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+  .spec-role { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--primary); margin-bottom: 6px; }
+  .spec-name { font-family: var(--font-heading); font-size: 18px; color: var(--ink); margin-bottom: 3px; }
+  .spec-hex { font-size: 11px; color: var(--ink-mid); margin-bottom: 5px; }
+  .spec-use { font-size: 11px; color: var(--ink); opacity: 0.55; line-height: 1.5; }
+
+  /* ── LOGO VARIANTS ── */
+  .logo-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .logo-card { padding: 40px 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; border-radius: 24px; }
+  .logo-card.lc-primary  { background: var(--primary); }
+  .logo-card.lc-berry    { background: var(--berry); }
+  .logo-card.lc-light    { background: var(--bg-warm); border: 1px solid var(--border); }
+
+  .logo-variant { font-family: var(--font-display); font-size: 38px; font-weight: 300; }
+  .logo-card.lc-primary .logo-variant,
+  .logo-card.lc-berry .logo-variant { color: white; }
+  .logo-card.lc-light .logo-variant { color: var(--ink); }
+
+  .logo-card-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.55; }
+  .logo-card.lc-primary .logo-card-label,
+  .logo-card.lc-berry .logo-card-label { color: white; }
+  .logo-card.lc-light .logo-card-label { color: var(--ink); }
+
+  .lm-small { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+  .lm-small svg { width: 30px; height: 30px; }
+
+  /* ── SLOGANS ── */
+  .slogan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .slogan-card { background: var(--bg-warm); border: 1px solid var(--border); border-radius: 24px; padding: 32px 28px; }
+  .slogan-card.featured { background: var(--primary); border-color: var(--primary); grid-column: 1/-1; }
+  .slogan-card.berry-card { background: var(--berry); border-color: var(--berry); }
+
+  .slogan-text { font-family: var(--font-display); font-size: 26px; font-weight: 300; font-style: italic; color: var(--ink); line-height: 1.3; margin-bottom: 10px; }
+  .slogan-card.featured .slogan-text { color: white; font-size: 34px; }
+  .slogan-card.berry-card .slogan-text { color: white; }
+  .slogan-note { font-size: 10px; color: var(--primary); letter-spacing: 0.08em; text-transform: uppercase; }
+  .slogan-card.featured .slogan-note { color: rgba(255,255,255,0.7); }
+  .slogan-card.berry-card .slogan-note { color: rgba(255,255,255,0.7); }
+
+  /* ── TYPE ── */
+  .type-showcase { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .type-card { border-radius: 24px; padding: 28px; }
+  .type-card.tc-light { background: var(--bg-warm); border: 1px solid var(--border); }
+  .type-card.tc-primary { background: var(--primary); }
+  .type-card.tc-berry { background: var(--berry); }
+  .type-card.tc-accent { background: var(--accent); }
+
+  .type-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; }
+  .tc-light .type-label { color: var(--primary); }
+  .tc-primary .type-label, .tc-berry .type-label, .tc-accent .type-label { color: rgba(255,255,255,0.7); }
+
+  .type-display { font-family: var(--font-display); font-size: 50px; font-weight: 300; line-height: 1; margin-bottom: 8px; }
+  .tc-light .type-display { color: var(--ink); }
+  .tc-primary .type-display, .tc-berry .type-display, .tc-accent .type-display { color: white; }
+
+  .type-name { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 3px; }
+  .tc-light .type-name { color: var(--primary); }
+  .tc-primary .type-name, .tc-berry .type-name, .tc-accent .type-name { color: rgba(255,255,255,0.7); }
+
+  .type-spec { font-size: 11px; opacity: 0.5; }
+  .tc-primary .type-spec, .tc-berry .type-spec, .tc-accent .type-spec { color: white; }
+
+  /* ── APP MOCKUP ── */
+  .mock-frame { background: var(--surface); border-radius: 32px; padding: 48px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; align-items: start; }
+  .phone-screen { background: var(--bg); border-radius: 32px; padding: 24px 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); border: 1px solid var(--border); }
+  .phone-screen.featured { transform: translateY(-18px); box-shadow: 0 36px 72px rgba(0,0,0,0.14); }
+
+  .screen-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .screen-logo { font-family: var(--font-display); font-size: 22px; font-weight: 300; color: var(--ink); }
+  .screen-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; }
+
+  .screen-hero { background: var(--primary); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .screen-hero-label { font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.75); margin-bottom: 5px; }
+  .screen-hero-title { font-family: var(--font-display); font-size: 19px; font-weight: 300; color: white; font-style: italic; line-height: 1.2; margin-bottom: 12px; }
+  .screen-cta { background: white; color: var(--primary); font-size: 9px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 7px 13px; border-radius: 20px; display: inline-block; }
+
+  .screen-card { background: var(--bg-warm); border: 1px solid var(--border); border-radius: 16px; padding: 13px; margin-bottom: 9px; }
+  .screen-card-tag { font-size: 7px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--primary); margin-bottom: 4px; }
+  .screen-card-title { font-family: var(--font-heading); font-size: 12px; color: var(--ink); font-weight: 400; line-height: 1.3; margin-bottom: 6px; }
+  .pill { background: var(--primary-wash); color: var(--primary-dk); font-size: 7px; padding: 3px 8px; border-radius: 20px; display: inline-block; margin: 2px 2px 0 0; }
+  .pill.green { background: var(--secondary-wash); color: var(--secondary); }
+  .pill.berry { background: var(--berry-wash); color: var(--berry); }
+
+  .ingredient-chip { background: var(--primary); color: white; font-size: 8px; padding: 4px 10px; border-radius: 20px; display: inline-block; margin: 2px; }
+  .ingredient-chip.uncertain { background: var(--berry-lt); color: var(--berry); }
+
+  .screen-recipe-bar { background: var(--primary); border-radius: 12px; padding: 10px 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+  .screen-recipe-bar.berry-bar { background: var(--berry); }
+  .screen-recipe-bar.green-bar { background: var(--secondary); }
+  .recipe-bar-name { font-size: 10px; color: white; font-family: var(--font-heading); }
+  .recipe-bar-tag { font-size: 7px; color: rgba(255,255,255,0.75); letter-spacing: 0.08em; }
+
+  /* ── TEAM ── */
+  .husky-badge { display: inline-flex; align-items: center; gap: 16px; background: var(--bg-warm); border: 1px solid var(--border); border-radius: 50px; padding: 12px 24px 12px 12px; }
+  .husky-icon { width: 52px; height: 52px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .team-name { font-size: 14px; font-weight: 500; color: var(--ink); letter-spacing: 0.03em; }
+  .team-sub { font-size: 11px; color: var(--ink-mid); letter-spacing: 0.04em; }
+
+  .doc-footer { border-top: 1px solid var(--border); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; margin-top: 32px; }
+  .doc-footer-logo { font-family: var(--font-display); font-size: 20px; font-weight: 300; color: var(--ink); }
+  .doc-footer-note { font-size: 10px; color: var(--ink); opacity: 0.3; letter-spacing: 0.08em; }
+</style>
+</head>
+<body>
+
+<div class="concept-banner">Concept A · Lime Primary · Lime · Blood Orange · Berry · Saffron · White Background</div>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Brand Identity · Concept A · Citrus &amp; Cream</div>
+    <div class="logo-lockup">
+      <div class="logo-mark">
+        <svg viewBox="0 0 48 48" fill="none">
+          <path d="M24 44 L24 10" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M24 15 C24 15 17 13 16 10 C17 8 20 9 24 13Z" fill="white"/>
+          <path d="M24 21 C24 21 16 19 15 16 C16 14 19 15 24 19Z" fill="white" opacity="0.85"/>
+          <path d="M24 28 C24 28 15 26 14 23 C15.5 21 18.5 22 24 26Z" fill="white" opacity="0.7"/>
+          <path d="M24 35 C24 35 15 33 14 30 C15.5 28 18.5 29 24 33Z" fill="white" opacity="0.5"/>
+          <path d="M24 15 C24 15 31 13 32 10 C31 8 28 9 24 13Z" fill="white"/>
+          <path d="M24 21 C24 21 32 19 33 16 C32 14 29 15 24 19Z" fill="white" opacity="0.85"/>
+          <path d="M24 28 C24 28 33 26 34 23 C32.5 21 29.5 22 24 26Z" fill="white" opacity="0.7"/>
+          <path d="M24 35 C24 35 33 33 34 30 C32.5 28 29.5 29 24 33Z" fill="white" opacity="0.5"/>
+          <path d="M24 10 C24 10 20 7 21 4 C23 3 25.5 5 24 9Z" fill="rgba(255,255,255,0.6)"/>
+          <path d="M24 10 C24 10 28 7 27 4 C25 3 22.5 5 24 9Z" fill="rgba(255,255,255,0.6)"/>
+        </svg>
+      </div>
+      <div class="logo-wordmark">Eathos</div>
+    </div>
+    <div class="logo-tagline">AI Wellness Coach · Fridge to Table · Built with Gemini</div>
+    <div class="slogan-primary">Eat with <em>intention.</em></div>
+    <div class="slogan-sub">Your kitchen, understood. Your meals, elevated.</div>
+  </div>
+
+  <!-- PALETTE -->
+  <div class="section">
+    <div class="section-label">Color Palette — Citrus &amp; Cream</div>
+    <div class="palette-row">
+      <div class="swatch" style="background:#E8922A;"><div class="swatch-name" style="color:white;">Saffron</div><div class="swatch-hex" style="color:white;">#E8922A</div></div>
+      <div class="swatch" style="background:#C4741A;"><div class="swatch-name" style="color:white;">Turmeric</div><div class="swatch-hex" style="color:white;">#C4741A</div></div>
+      <div class="swatch" style="background:#E05A2B;"><div class="swatch-name" style="color:white;">Blood Orange</div><div class="swatch-hex" style="color:white;">#E05A2B</div></div>
+      <div class="swatch" style="background:#C4446A;"><div class="swatch-name" style="color:white;">Berry</div><div class="swatch-hex" style="color:white;">#C4446A</div></div>
+      <div class="swatch" style="background:#6AAB5E;"><div class="swatch-name" style="color:white;">Lime</div><div class="swatch-hex" style="color:white;">#6AAB5E</div></div>
+      <div class="swatch" style="background:#E8D44A;"><div class="swatch-name" style="color:#5A534A;">Lemon</div><div class="swatch-hex" style="color:#5A534A;">#E8D44A</div></div>
+      <div class="swatch" style="background:#F5C87A;"><div class="swatch-name" style="color:#5A534A;">Peach</div><div class="swatch-hex" style="color:#5A534A;">#F5C87A</div></div>
+      <div class="swatch" style="background:#F2F0EC;"><div class="swatch-name" style="color:#9A9088;">Surface</div><div class="swatch-hex" style="color:#9A9088;">#F2F0EC</div></div>
+      <div class="swatch" style="background:#F8F7F4; border:1px solid #E4E0D8;"><div class="swatch-name" style="color:#9A9088;">Warm White</div><div class="swatch-hex" style="color:#9A9088;">#F8F7F4</div></div>
+      <div class="swatch" style="background:#FFFFFF; border:1px solid #E4E0D8;"><div class="swatch-name" style="color:#9A9088;">White</div><div class="swatch-hex" style="color:#9A9088;">#FFFFFF</div></div>
+    </div>
+    <div class="palette-specs">
+      <div class="spec-card" style="border-left:3px solid #E8922A;">
+        <div class="spec-role">Primary</div><div class="spec-name">Saffron</div>
+        <div class="spec-hex">#E8922A</div>
+        <div class="spec-use">Hero backgrounds, primary buttons, logo mark, section accents</div>
+      </div>
+      <div class="spec-card" style="border-left:3px solid #C4446A;">
+        <div class="spec-role">Accent</div><div class="spec-name">Berry</div>
+        <div class="spec-hex">#C4446A</div>
+        <div class="spec-use">CTAs, badges, featured cards, highlight moments</div>
+      </div>
+      <div class="spec-card" style="border-left:3px solid #E05A2B;">
+        <div class="spec-role">Pop</div><div class="spec-name">Blood Orange</div>
+        <div class="spec-hex">#E05A2B</div>
+        <div class="spec-use">Alerts, energy tags, active states, recipe highlights</div>
+      </div>
+      <div class="spec-card" style="border-left:3px solid #6AAB5E;">
+        <div class="spec-role">Fresh</div><div class="spec-name">Lime</div>
+        <div class="spec-hex">#6AAB5E</div>
+        <div class="spec-use">Healthy tags, plant-based badges, positive states</div>
+      </div>
+      <div class="spec-card" style="border-left:3px solid #F2F0EC;">
+        <div class="spec-role">Background</div><div class="spec-name">Surface</div>
+        <div class="spec-hex">#F2F0EC · #FFFFFF</div>
+        <div class="spec-use">App background, card surfaces, screen base</div>
+      </div>
+      <div class="spec-card" style="border-left:3px solid #E8D44A;">
+        <div class="spec-role">Vitality</div><div class="spec-name">Lemon</div>
+        <div class="spec-hex">#E8D44A</div>
+        <div class="spec-use">Nutrition tags, energy indicators, citrus moments</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGO VARIANTS -->
+  <div class="section">
+    <div class="section-label">Logo Variants</div>
+    <div class="logo-grid">
+      <div class="logo-card lc-primary">
+        <div class="lm-small" style="background:white;">
+          <svg viewBox="0 0 48 48" fill="none">
+            <path d="M24 44 L24 10" stroke="#E8922A" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M24 15 C24 15 17 13 16 10 C17 8 20 9 24 13Z" fill="#E8922A"/>
+            <path d="M24 21 C24 21 16 19 15 16 C16 14 19 15 24 19Z" fill="#E8922A" opacity="0.8"/>
+            <path d="M24 28 C24 28 15 26 14 23 C15.5 21 18.5 22 24 26Z" fill="#E8922A" opacity="0.6"/>
+            <path d="M24 35 C24 35 15 33 14 30 C15.5 28 18.5 29 24 33Z" fill="#E8922A" opacity="0.4"/>
+            <path d="M24 15 C24 15 31 13 32 10 C31 8 28 9 24 13Z" fill="#E8922A"/>
+            <path d="M24 21 C24 21 32 19 33 16 C32 14 29 15 24 19Z" fill="#E8922A" opacity="0.8"/>
+            <path d="M24 28 C24 28 33 26 34 23 C32.5 21 29.5 22 24 26Z" fill="#E8922A" opacity="0.6"/>
+            <path d="M24 35 C24 35 33 33 34 30 C32.5 28 29.5 29 24 33Z" fill="#E8922A" opacity="0.4"/>
+            <path d="M24 10 C24 10 20 7 21 4 C23 3 25.5 5 24 9Z" fill="#C4741A"/>
+            <path d="M24 10 C24 10 28 7 27 4 C25 3 22.5 5 24 9Z" fill="#C4741A"/>
+          </svg>
+        </div>
+        <div class="logo-variant">Eathos</div>
+        <div class="logo-card-label">On Saffron · Primary</div>
+      </div>
+      <div class="logo-card lc-berry">
+        <div class="lm-small" style="background:white;">
+          <svg viewBox="0 0 48 48" fill="none">
+            <path d="M24 44 L24 10" stroke="#C4446A" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M24 15 C24 15 17 13 16 10 C17 8 20 9 24 13Z" fill="#C4446A"/>
+            <path d="M24 21 C24 21 16 19 15 16 C16 14 19 15 24 19Z" fill="#C4446A" opacity="0.8"/>
+            <path d="M24 28 C24 28 15 26 14 23 C15.5 21 18.5 22 24 26Z" fill="#C4446A" opacity="0.6"/>
+            <path d="M24 35 C24 35 15 33 14 30 C15.5 28 18.5 29 24 33Z" fill="#C4446A" opacity="0.4"/>
+            <path d="M24 15 C24 15 31 13 32 10 C31 8 28 9 24 13Z" fill="#C4446A"/>
+            <path d="M24 21 C24 21 32 19 33 16 C32 14 29 15 24 19Z" fill="#C4446A" opacity="0.8"/>
+            <path d="M24 28 C24 28 33 26 34 23 C32.5 21 29.5 22 24 26Z" fill="#C4446A" opacity="0.6"/>
+            <path d="M24 35 C24 35 33 33 34 30 C32.5 28 29.5 29 24 33Z" fill="#C4446A" opacity="0.4"/>
+            <path d="M24 10 C24 10 20 7 21 4 C23 3 25.5 5 24 9Z" fill="#ECA8BE"/>
+            <path d="M24 10 C24 10 28 7 27 4 C25 3 22.5 5 24 9Z" fill="#ECA8BE"/>
+          </svg>
+        </div>
+        <div class="logo-variant">Eathos</div>
+        <div class="logo-card-label">On Berry · Secondary</div>
+      </div>
+      <div class="logo-card lc-light">
+        <div class="lm-small" style="background:#E8922A;">
+          <svg viewBox="0 0 48 48" fill="none">
+            <path d="M24 44 L24 10" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M24 15 C24 15 17 13 16 10 C17 8 20 9 24 13Z" fill="white"/>
+            <path d="M24 21 C24 21 16 19 15 16 C16 14 19 15 24 19Z" fill="white" opacity="0.85"/>
+            <path d="M24 28 C24 28 15 26 14 23 C15.5 21 18.5 22 24 26Z" fill="white" opacity="0.65"/>
+            <path d="M24 35 C24 35 15 33 14 30 C15.5 28 18.5 29 24 33Z" fill="white" opacity="0.45"/>
+            <path d="M24 15 C24 15 31 13 32 10 C31 8 28 9 24 13Z" fill="white"/>
+            <path d="M24 21 C24 21 32 19 33 16 C32 14 29 15 24 19Z" fill="white" opacity="0.85"/>
+            <path d="M24 28 C24 28 33 26 34 23 C32.5 21 29.5 22 24 26Z" fill="white" opacity="0.65"/>
+            <path d="M24 35 C24 35 33 33 34 30 C32.5 28 29.5 29 24 33Z" fill="white" opacity="0.45"/>
+            <path d="M24 10 C24 10 20 7 21 4 C23 3 25.5 5 24 9Z" fill="rgba(255,255,255,0.6)"/>
+            <path d="M24 10 C24 10 28 7 27 4 C25 3 22.5 5 24 9Z" fill="rgba(255,255,255,0.6)"/>
+          </svg>
+        </div>
+        <div class="logo-variant">Eathos</div>
+        <div class="logo-card-label">On White · Reversed</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLOGANS -->
+  <div class="section">
+    <div class="section-label">Slogan Options</div>
+    <div class="slogan-grid">
+      <div class="slogan-card featured"><div class="slogan-text">Eat with intention.</div><div class="slogan-note">⭐ Recommended Primary</div></div>
+      <div class="slogan-card"><div class="slogan-text">The coach inside your kitchen.</div><div class="slogan-note">Persona-forward</div></div>
+      <div class="slogan-card berry-card"><div class="slogan-text">Nourish every generation.</div><div class="slogan-note">Multi-gen differentiator</div></div>
+      <div class="slogan-card"><div class="slogan-text">From your fridge, for your life.</div><div class="slogan-note">Functional value prop</div></div>
+    </div>
+  </div>
+
+  <!-- APP MOCK -->
+  <div class="section">
+    <div class="section-label">App UI Preview</div>
+    <div class="mock-frame">
+      <div class="phone-screen">
+        <div class="screen-header"><div class="screen-logo">Eathos</div><div class="screen-dot"></div></div>
+        <div class="screen-hero">
+          <div class="screen-hero-label">Good evening, Maya</div>
+          <div class="screen-hero-title">What's in your fridge tonight?</div>
+          <div class="screen-cta">Scan Fridge →</div>
+        </div>
+        <div class="screen-card">
+          <div class="screen-card-tag">Last meal · 3 days ago</div>
+          <div class="screen-card-title">Salmon Bowl with Quinoa</div>
+          <span class="pill">High protein</span><span class="pill green">Plant-forward</span>
+        </div>
+        <div class="screen-card">
+          <div class="screen-card-tag">Restock suggestion</div>
+          <div class="screen-card-title">Lemons · Ginger · Spinach</div>
+          <span class="pill">Order via Instacart</span>
+        </div>
+      </div>
+      <div class="phone-screen featured">
+        <div class="screen-header"><div class="screen-logo">Eathos</div><div class="screen-dot"></div></div>
+        <div style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--primary);margin-bottom:10px;">Detected · 9 items</div>
+        <div style="font-family:var(--font-heading);font-size:17px;color:var(--ink);margin-bottom:14px;line-height:1.2;">Confirm your ingredients</div>
+        <div style="margin-bottom:12px;">
+          <div class="ingredient-chip">Salmon</div><div class="ingredient-chip">Quinoa</div>
+          <div class="ingredient-chip">Spinach</div><div class="ingredient-chip">Lemon</div>
+          <div class="ingredient-chip">Ginger</div><div class="ingredient-chip uncertain">? Sour cream</div>
+          <div class="ingredient-chip">Avocado</div><div class="ingredient-chip uncertain">? Feta</div>
+        </div>
+        <div style="font-size:9px;color:var(--berry);margin-bottom:14px;">Pink items need confirmation</div>
+        <div style="font-family:var(--font-heading);font-size:13px;color:var(--ink);margin-bottom:8px;">3 Recipes for tonight</div>
+        <div class="screen-recipe-bar"><div class="recipe-bar-name">Salmon Poke Bowl</div><div class="recipe-bar-tag">25 min</div></div>
+        <div class="screen-recipe-bar berry-bar"><div class="recipe-bar-name">Ginger Miso Salmon</div><div class="recipe-bar-tag">Elder-friendly</div></div>
+        <div class="screen-recipe-bar green-bar"><div class="recipe-bar-name">Quinoa Power Bowl</div><div class="recipe-bar-tag">Quick · 15 min</div></div>
+      </div>
+      <div class="phone-screen">
+        <div class="screen-header"><div class="screen-logo">Eathos</div><div class="screen-dot"></div></div>
+        <div class="screen-hero" style="background:var(--berry);">
+          <div class="screen-hero-label">Tonight's Pick</div>
+          <div class="screen-hero-title">Salmon Poke Bowl</div>
+          <div class="screen-cta" style="background:white;color:var(--berry);">Watch Prep →</div>
+        </div>
+        <div class="screen-card" style="border-left:2px solid var(--primary);">
+          <div class="screen-card-tag">For Maya, 34</div>
+          <div class="screen-card-title">High protein · Omega-3 rich</div>
+          <span class="pill">38g protein</span>
+        </div>
+        <div class="screen-card" style="border-left:2px solid var(--berry);">
+          <div class="screen-card-tag">For Kamala, 68</div>
+          <div class="screen-card-title">Low sodium · Soft prep</div>
+        </div>
+        <div class="screen-card">
+          <div class="screen-card-tag">Missing · 2 items</div>
+          <div class="screen-card-title">Sesame oil · Nori</div>
+          <span class="pill">~$4 · Instacart</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAM BADGE -->
+  <div class="section">
+    <div class="section-label">Team Identity</div>
+    <div class="husky-badge">
+      <div class="husky-icon">
+        <svg width="34" height="34" viewBox="0 0 36 36" fill="none">
+          <path d="M9 14 L7 6 L14 11Z" fill="#F5C87A"/>
+          <path d="M27 14 L29 6 L22 11Z" fill="#F5C87A"/>
+          <path d="M9.5 13 L8.5 8 L13 11.5Z" fill="#C4741A"/>
+          <path d="M26.5 13 L27.5 8 L23 11.5Z" fill="#C4741A"/>
+          <ellipse cx="18" cy="20" rx="11" ry="10" fill="#F8F7F4"/>
+          <path d="M18 14 C14 14 11 16 11 20 C11 24 14 27 18 27 C22 27 25 24 25 20 C25 16 22 14 18 14Z" fill="#FFFFFF"/>
+          <path d="M18 14 C16 14 14 15 13 16.5 C14 15.5 16 15 18 15 C20 15 22 15.5 23 16.5 C22 15 20 14 18 14Z" fill="#F5C87A"/>
+          <circle cx="14.5" cy="19" r="2.2" fill="#2A2520"/>
+          <circle cx="21.5" cy="19" r="2.2" fill="#2A2520"/>
+          <circle cx="15.2" cy="18.3" r="0.7" fill="white"/>
+          <circle cx="22.2" cy="18.3" r="0.7" fill="white"/>
+          <ellipse cx="18" cy="22.5" rx="2" ry="1.3" fill="#C4741A"/>
+          <path d="M15.5 24.5 C16.5 25.5 19.5 25.5 20.5 24.5" stroke="#C4741A" stroke-width="0.8" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+      <div>
+        <div class="team-name">Red Huskies</div>
+        <div class="team-sub">Cornell × Northeastern · Frontiers Gen-AI 2026</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    <div class="doc-footer-logo">Eathos</div>
+    <div class="doc-footer-note">Brand Identity · Concept A · Citrus &amp; Cream · March 2026</div>
+  </div>
+
+</div>
+</body>
+</html>

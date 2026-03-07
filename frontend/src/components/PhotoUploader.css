@@ -1,4 +1,4 @@
-/* PhotoUploader styles */
+/* PhotoUploader styles — Eathos brand */
 
 .uploader-container {
   display: flex;
@@ -12,8 +12,8 @@
   width: 100%;
   max-width: 640px;
   min-height: 420px;
-  border: 2px dashed var(--color-sage);
-  border-radius: var(--radius-xl);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-2xl);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -24,16 +24,16 @@
 }
 
 .drop-zone:hover {
-  border-color: var(--color-forest-light);
-  background: rgba(46, 107, 79, 0.02);
+  border-color: var(--color-primary-light);
+  background: var(--color-primary-wash);
   box-shadow: var(--shadow-md);
 }
 
 .drop-zone.drag-over {
-  border-color: var(--color-forest);
+  border-color: var(--color-primary);
   border-style: solid;
-  background: rgba(46, 107, 79, 0.05);
-  box-shadow: var(--shadow-glow-forest);
+  background: var(--color-primary-wash);
+  box-shadow: var(--shadow-glow-primary);
   transform: scale(1.01);
 }
 
@@ -51,21 +51,27 @@
 }
 
 .drop-zone-icon {
-  color: var(--color-sage);
+  color: var(--color-primary-light);
   margin-bottom: var(--space-2);
 }
 
 .drop-zone-title {
-  font-family: var(--font-heading);
-  font-size: var(--text-3xl);
-  font-weight: var(--weight-bold);
-  color: var(--color-charcoal);
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-light);
+  color: var(--color-ink);
   line-height: var(--leading-tight);
+  font-style: italic;
+}
+
+.drop-zone-title em {
+  font-style: normal;
+  color: var(--color-primary);
 }
 
 .drop-zone-subtitle {
   font-size: var(--text-base);
-  color: var(--color-charcoal-light);
+  color: var(--color-ink-mid);
   max-width: 320px;
 }
 
@@ -81,23 +87,24 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-6);
-  border-radius: var(--radius-md);
-  font-family: var(--font-heading);
-  font-weight: var(--weight-semibold);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-weight: var(--weight-medium);
   font-size: var(--text-base);
   transition: all var(--transition-fast);
   white-space: nowrap;
+  letter-spacing: 0.01em;
 }
 
 .btn-primary {
-  background: var(--color-forest);
+  background: var(--color-primary);
   color: var(--color-white);
   box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover {
-  background: var(--color-forest-light);
-  box-shadow: var(--shadow-glow-forest);
+  background: var(--color-primary-dark);
+  box-shadow: var(--shadow-glow-primary);
   transform: translateY(-1px);
 }
 
@@ -107,27 +114,26 @@
 
 .btn-outline {
   background: transparent;
-  color: var(--color-terracotta);
-  border: 2px solid var(--color-terracotta);
+  color: var(--color-accent);
+  border: 2px solid var(--color-accent);
 }
 
 .btn-outline:hover {
-  background: rgba(199, 91, 57, 0.05);
-  box-shadow: var(--shadow-glow-terracotta);
+  background: var(--color-accent-wash);
+  box-shadow: var(--shadow-glow-accent);
 }
 
 .btn-secondary {
-  background: var(--color-cream-dark);
-  color: var(--color-charcoal);
+  background: var(--color-surface);
+  color: var(--color-ink);
 }
 
 .btn-secondary:hover {
-  background: var(--color-sage);
-  color: var(--color-white);
+  background: var(--color-border);
 }
 
 .btn-danger {
-  background: var(--color-rose);
+  background: var(--color-berry);
   color: var(--color-white);
 }
 
@@ -180,7 +186,7 @@
   max-width: 500px;
   max-height: 400px;
   object-fit: cover;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-2xl);
   filter: brightness(0.7);
 }
 
@@ -196,7 +202,10 @@
 
 .analyzing-overlay h2 {
   color: var(--color-white);
+  font-family: var(--font-display);
   font-size: var(--text-2xl);
+  font-weight: var(--weight-light);
+  font-style: italic;
   text-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
@@ -209,7 +218,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--color-forest-light);
+  background: var(--color-primary);
   animation: pulse-dot 1.5s ease infinite;
-  box-shadow: var(--shadow-glow-forest);
+  box-shadow: var(--shadow-glow-primary);
 }

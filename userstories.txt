@@ -1,0 +1,135 @@
+﻿Business Idea: Most meal plans fail because life doesn't follow a plan. This is an AI nutrition coach that adapts to your day, your goals, your food sensitivities, your pantry, and whatever just changed on your calendar. 
+
+
+Target Customer: Working professionals (25-45 yrs) who manage busy schedules and struggle with eating healthy and managing their grocery shopping. 
+
+
+Agentic Capabilities: 
+* Decision maker for daily meals, grocery shopping. 
+
+
+User Journey: 
+Onboarding/ Intake: 
+1. Agent will welcome the user to the app and explain what they do, and if the user is ready to get started there will be a button to start the intake process.
+2. User will be asked to connect their Google account.
+3. User will be asked to provide additional information (Reference below).
+   1. User will be asked to take a picture of their: fridge, pantry, or any recent grocery receipts.
+4. Once the user inputs the data, the agent will ask if they are open to shopping for additional groceries or use what the already have. 
+5. The app will then show a holding page to show that its working on generating a meal plan. 
+6. The agent must take the persona of a wellness coach that is positive, encouraging, and data driven to provide recommendations that are rooted in building healthy habits. 
+
+
+Category
+	Data Points
+	Source
+	Format
+	Priority
+	User Profile
+	Name
+	Google Auth
+	Free Text
+	Must Have
+	User Profile
+	Email
+	Google Auth
+	Free Text
+	Must Have
+	User Profile
+	Birthday
+	Google Auth
+	Free Text
+	Must Have
+	User Profile
+	Gender
+	Google Auth
+	Free Text
+	Must Have
+	User Profile
+	Weight
+	Google Auth
+	Free Text
+	Must Have
+	User Profile
+	BMI
+	Google Auth
+	Free Text
+	Must Have
+	User Profile
+	Dietary Restrictions / Food Sensitivities[a]
+	User Input
+	Free Text/ Multiple Choice 
+	Must Have
+	Preferences
+	Nutrition Goals
+	User Input
+	Free Text
+	Must Have
+	Preferences
+	Meal Preferences
+* Breakfast
+* Lunch
+* Dinner
+* Snacks
+	User Input
+	Free Text
+	Must Have
+	Preferences
+	Daily Routine[b]
+	User Input/ Google Calendar
+	TBD
+	Nice to Have
+	Resources
+	Groceries
+	User Input
+	Image
+	Must Have
+	
+
+Home Page:
+1. Entry Points
+   1. Meal / Recipe Generator
+   2. Shopping List
+   3. Meal Tracker/ Meal History 
+
+
+Meal/ Recipe Generator:
+1. User will open the app. The agent will greet the user, and suggest a meal based on the time of day, whats in their inventory, their meal preference, and their schedule (do they have time to cook vs do they need something quick). Initially a default recipe will be suggested and if they want more, there will be a button to see more options. 
+2. Each option will contain an image and a video tutorial that walks through the recipe. 
+3. Once the user selects their option for breakfast it will be logged in their meal tracker. The user will then take an image of their food and log it into the tracker. 
+4. This process will repeat whenever the user comes back to generate a meal option. 
+5. The agent should also be able to help make decisions around takeout, snacks, and impromptu meals during the day.  
+
+
+Inventory/ Shopping List Manager: 
+6. In the backend the agent will keep track of the inventory and continue to update it as the meals are cooked. When the inventory is 3 days away from depleting, the agent will notify the user that they are running low on specific items and suggest a shopping cart for the user to approve.
+7. The user can then approve the shopping cart for the agent to execute via Instacart, or they will have the option to shop for the items themselves. If they shop or the items themselves they’ll upload the receipt and it will update the inventory based on what was purchased. 
+
+
+Meal and Milestone Tracking
+8. Daily Meal Tracker- will produce an end of day summary of total calories, fiber, fats, etc for the day.
+9. Progress Tracker- this will be based on inputs from the user at end of day recap. 
+
+
+End of Day Recap
+10. After the final meal, the agent will ask three questions to assess changes in their overall health:
+   1. How did your energy and mood hold up today?
+      1. Strong all day- no crashes
+      2. Started strong, faded mid day
+      3. Ups and Downs throughout the day
+      4. Low energy and mood all day
+   2. How well did the meals keep you satisfied and on plan?
+      1. Fully satisfied- no cravings
+      2. Mostly on plan, minor cravings
+      3. Hungry between meals made swaps
+      4. Went off plan significantly 
+   3. How did your body physically respond to todays meals?
+      1. Felt great- no issues
+      2. Minor bloating or heaviness
+      3. Noticeable discomfort or digestive issues
+      4. Headaches, fatigue, or other symptoms
+
+
+Branding Guidelines 
+* TBD
+[a]Search options to inclue in this drop down
+[b]Put in exercise, meal times, etc.

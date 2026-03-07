@@ -1,144 +1,331 @@
-import { useReducer, useCallback } from 'react';
+import { useReducer, useCallback, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import AppShell from './components/AppShell';
+import WelcomeScreen from './components/WelcomeScreen';
+import IntakeForm from './components/IntakeForm';
+import FridgeCapture from './components/FridgeCapture';
+import GroceryPrefs from './components/GroceryPrefs';
+import PlanGenerating from './components/PlanGenerating';
+import HomePage from './components/HomePage';
 import PhotoUploader from './components/PhotoUploader';
 import InventoryGrid from './components/InventoryGrid';
 import RecipeCard from './components/RecipeCard';
 import AgentTraceTimeline from './components/AgentTraceTimeline';
 import DietaryPreferencesModal from './components/DietaryPreferencesModal';
-import { analyzeImage, sendAction } from './api';
+import MealLogger from './components/MealLogger';
+import ShoppingList from './components/ShoppingList';
+import MealTracker from './components/MealTracker';
+import NutritionistChat from './components/NutritionistChat';
+import EndOfDayRecap from './components/EndOfDayRecap';
+import ProgressTracker from './components/ProgressTracker';
+import BottomNav from './components/BottomNav';
+import RestockAlert from './components/RestockAlert';
+import ErrorRecovery from './components/ErrorRecovery';
+import { analyzeImage, sendAction, getInventory, generateRecipeFromInventory } from './api';
 import './App.css';
+
+/* ---------- localStorage helpers ---------- */
+function loadState(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    let parsed = JSON.parse(raw);
+    // Handle double-encoded JSON strings (backend stores inventory as json.dumps)
+    if (typeof parsed === 'string') {
+      try { parsed = JSON.parse(parsed); } catch { }
+    }
+    return parsed;
+  } catch { return fallback; }
+}
+
+function saveState(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { }
+}
 
 /* ---------- State Machine ---------- */
 const initialState = {
-  phase: 'upload',          // upload | analyzing | inventory | generating | recipe | accepting | accepted
-  sessionId: null,
-  inventory: [],
+  hasOnboarded: loadState('eathos_onboarded', false),
+  userProfile: loadState('eathos_profile', null),
+  groceryPref: loadState('eathos_grocery_pref', null),
+
+  phase: 'upload',
+  sessionId: loadState('eathos_sessionId', null),
+  inventory: loadState('eathos_inventory', []),
+  fridgeImage: loadState('eathos_fridgeImage', null),
   recipe: null,
   recipeImage: null,
-  preferences: {
-    restrictions: [],
-    cuisines: [],
-    allergies: '',
-  },
+  preferences: loadState('eathos_preferences', { restrictions: [], cuisines: [], allergies: '' }),
   agentSteps: [
-    { id: 'analyzer',    name: 'Food Analyzer',    status: 'pending', summary: '' },
-    { id: 'inventory',   name: 'Inventory Sync',   status: 'pending', summary: '' },
-    { id: 'nutritionist',name: 'Recipe Chef',      status: 'pending', summary: '' },
-    { id: 'image',       name: 'Image Generator',  status: 'pending', summary: '' },
+    { id: 'analyzer', name: 'Food Analyzer', status: 'pending', summary: '' },
+    { id: 'inventory', name: 'Inventory Sync', status: 'pending', summary: '' },
+    { id: 'nutritionist', name: 'Recipe Chef', status: 'pending', summary: '' },
+    { id: 'image', name: 'Image Generator', status: 'pending', summary: '' },
   ],
   rejectCount: 0,
   error: null,
   showPreferences: false,
+  showMealLogger: false,
+
+  mealHistory: loadState('eathos_meals', []),
+  shoppingList: loadState('eathos_shopping', []),
+  recapHistory: loadState('eathos_recaps', []),
 };
 
 function reducer(state, action) {
   switch (action.type) {
-    case 'START_ANALYSIS':
+    case 'COMPLETE_ONBOARDING': {
+      saveState('eathos_onboarded', true);
+      saveState('eathos_profile', action.profile);
+      const prefs = action.profile?.preferences;
+      if (prefs) saveState('eathos_preferences', prefs);
       return {
         ...state,
-        phase: 'analyzing',
-        error: null,
+        hasOnboarded: true,
+        userProfile: action.profile,
+        ...(prefs ? { preferences: prefs } : {}),
+      };
+    }
+    case 'SET_GROCERY_PREF':
+      saveState('eathos_grocery_pref', action.pref);
+      return { ...state, groceryPref: action.pref };
+    case 'FINISH_GENERATING':
+      return state;
+
+    case 'START_ANALYSIS':
+      return {
+        ...state, phase: 'analyzing', error: null,
         agentSteps: state.agentSteps.map(s =>
           s.id === 'analyzer' ? { ...s, status: 'active', summary: 'Scanning your fridge...' } : s
         ),
       };
-    case 'SET_INVENTORY':
+    case 'SET_INVENTORY': {
+      const newInv = action.inventory;
+      saveState('eathos_inventory', newInv);
+      saveState('eathos_sessionId', action.sessionId);
+      if (action.fridgeImage) {
+        saveState('eathos_fridgeImage', action.fridgeImage);
+      }
       return {
-        ...state,
-        phase: 'inventory',
-        sessionId: action.sessionId,
-        inventory: action.inventory,
+        ...state, phase: 'inventory', sessionId: action.sessionId, inventory: newInv,
+        ...(action.fridgeImage ? { fridgeImage: action.fridgeImage } : {}),
         agentSteps: state.agentSteps.map(s => {
-          if (s.id === 'analyzer') return { ...s, status: 'complete', summary: `Found ${action.inventory.length} items` };
+          if (s.id === 'analyzer') return { ...s, status: 'complete', summary: `Found ${newInv.length} items` };
           if (s.id === 'inventory') return { ...s, status: 'complete', summary: 'Inventory synced' };
           return s;
         }),
       };
+    }
     case 'START_RECIPE':
       return {
-        ...state,
-        phase: 'generating',
-        agentSteps: state.agentSteps.map(s =>
-          s.id === 'nutritionist' ? { ...s, status: 'active', summary: 'Crafting the perfect recipe...' } : s
-        ),
+        ...state, phase: 'generating',
+        agentSteps: state.agentSteps.map(s => {
+          if (s.id === 'analyzer' && state.inventory?.length > 0) return { ...s, status: 'complete', summary: `Found ${state.inventory.length} items` };
+          if (s.id === 'inventory' && state.inventory?.length > 0) return { ...s, status: 'complete', summary: 'Inventory synced' };
+          if (s.id === 'nutritionist') return { ...s, status: 'active', summary: 'Crafting the perfect recipe...' };
+          return s;
+        }),
       };
     case 'SET_RECIPE':
       return {
-        ...state,
-        phase: 'recipe',
-        recipe: action.recipe,
+        ...state, phase: 'recipe', recipe: action.recipe,
         agentSteps: state.agentSteps.map(s =>
           s.id === 'nutritionist' ? { ...s, status: 'complete', summary: action.recipe.title } : s
         ),
       };
     case 'START_ACCEPT':
       return {
-        ...state,
-        phase: 'accepting',
+        ...state, phase: 'accepting',
         agentSteps: state.agentSteps.map(s =>
           s.id === 'image' ? { ...s, status: 'active', summary: 'Generating image...' } : s
         ),
       };
     case 'ACCEPT_RECIPE':
       return {
-        ...state,
-        phase: 'accepted',
-        recipeImage: action.imageUrl,
+        ...state, phase: 'accepted', recipeImage: action.imageUrl,
         agentSteps: state.agentSteps.map(s =>
           s.id === 'image' ? { ...s, status: 'complete', summary: 'Done!' } : s
         ),
       };
     case 'REJECT_RECIPE':
       return {
-        ...state,
-        rejectCount: state.rejectCount + 1,
-        recipe: null,
-        phase: 'generating',
+        ...state, rejectCount: state.rejectCount + 1, recipe: null, phase: 'generating',
         agentSteps: state.agentSteps.map(s =>
           s.id === 'nutritionist' ? { ...s, status: 'active', summary: 'Thinking of something else...' } : s
         ),
       };
+
     case 'SET_PREFERENCES':
+      saveState('eathos_preferences', action.preferences);
       return { ...state, preferences: action.preferences };
+    case 'SET_PROFILE': {
+      const merged = { ...state.userProfile, ...action.profile };
+      saveState('eathos_profile', merged);
+      return { ...state, userProfile: merged };
+    }
     case 'TOGGLE_PREFERENCES':
       return { ...state, showPreferences: !state.showPreferences };
+    case 'TOGGLE_MEAL_LOGGER':
+      return { ...state, showMealLogger: !state.showMealLogger };
     case 'SET_ERROR':
       return { ...state, error: action.error };
-    case 'UPDATE_INVENTORY':
+    case 'UPDATE_INVENTORY': {
+      saveState('eathos_inventory', action.inventory);
       return { ...state, inventory: action.inventory };
+    }
+
+    case 'LOG_MEAL': {
+      const meals = [...state.mealHistory, action.meal];
+      saveState('eathos_meals', meals);
+      return { ...state, mealHistory: meals, showMealLogger: false };
+    }
+    case 'EDIT_MEAL': {
+      const meals = state.mealHistory.map(m =>
+        m.loggedAt === action.loggedAt ? { ...m, ...action.updated } : m
+      );
+      saveState('eathos_meals', meals);
+      return { ...state, mealHistory: meals };
+    }
+    case 'DELETE_MEAL': {
+      const meals = state.mealHistory.filter(m => m.loggedAt !== action.loggedAt);
+      saveState('eathos_meals', meals);
+      return { ...state, mealHistory: meals };
+    }
+
+    case 'UPDATE_SHOPPING': {
+      saveState('eathos_shopping', action.list);
+      return { ...state, shoppingList: action.list };
+    }
+    case 'TOGGLE_SHOPPING_ITEM': {
+      const list = state.shoppingList.map(i =>
+        i.name === action.name ? { ...i, checked: !i.checked } : i
+      );
+      saveState('eathos_shopping', list);
+      return { ...state, shoppingList: list };
+    }
+    case 'ADD_SHOPPING_ITEM': {
+      const list = [...state.shoppingList, action.item];
+      saveState('eathos_shopping', list);
+      return { ...state, shoppingList: list };
+    }
+    case 'REMOVE_SHOPPING_ITEM': {
+      const list = state.shoppingList.filter(i => i.name !== action.name);
+      saveState('eathos_shopping', list);
+      return { ...state, shoppingList: list };
+    }
+
+    case 'SUBMIT_RECAP': {
+      const recaps = [...state.recapHistory, action.recap];
+      saveState('eathos_recaps', recaps);
+      return { ...state, recapHistory: recaps };
+    }
+
     case 'RESET':
-      return { ...initialState };
+      return {
+        ...initialState,
+        hasOnboarded: state.hasOnboarded,
+        userProfile: state.userProfile,
+        preferences: state.preferences,
+        mealHistory: state.mealHistory,
+        shoppingList: state.shoppingList,
+        recapHistory: state.recapHistory,
+        inventory: state.inventory,
+      };
     default:
       return state;
   }
 }
 
-/* ---------- App Component ---------- */
-export default function App() {
-  const [state, dispatch] = useReducer(reducer, initialState);
+/* ---------- Scan Flow (the original fridge-to-recipe pipeline) ---------- */
+function ScanFlow({ state, dispatch }) {
+  const navigate = useNavigate();
 
-  /* --- Handlers --- */
   const handleUpload = useCallback(async (file) => {
     dispatch({ type: 'START_ANALYSIS' });
     try {
+      console.log('[ScanFlow] Uploading image...', file.name, file.size, 'bytes');
       const result = await analyzeImage(file);
+      console.log('[ScanFlow] analyzeImage result:', JSON.stringify(result, null, 2));
+
       const inventoryEvent = result.events.find(e => e.action === 'review_inventory');
+      console.log('[ScanFlow] inventoryEvent found:', !!inventoryEvent);
+
       if (inventoryEvent) {
+        // The inventory comes from the event directly.
+        // sync_inventory_tool returns {"inventory": [...]}, so unwrap if needed.
+        let rawInv = inventoryEvent.inventory;
+        console.log('[ScanFlow] rawInv:', rawInv);
+
+        // Unwrap nested {"inventory": [...]} wrapper from sync_inventory_tool
+        let items = [];
+        if (Array.isArray(rawInv)) {
+          items = rawInv;
+        } else if (rawInv && Array.isArray(rawInv.inventory)) {
+          items = rawInv.inventory;
+        }
+        console.log('[ScanFlow] items:', items.length, 'items');
+
+        // Also try to get fridge image URL from the event or session
+        let fridgeImage = null;
+        try {
+          const invState = await getInventory(result.session_id);
+          fridgeImage = invState.fridge_image_url || null;
+        } catch { /* ignore - fridge image is nice-to-have */ }
+
+        if (items.length === 0) {
+          console.warn('[ScanFlow] Zero items detected!');
+          dispatch({ type: 'SET_ERROR', error: 'zero_items' });
+          return;
+        }
+        console.log('[ScanFlow] Dispatching SET_INVENTORY with', items.length, 'items');
         dispatch({
           type: 'SET_INVENTORY',
           sessionId: result.session_id,
-          inventory: inventoryEvent.inventory?.inventory || inventoryEvent.inventory || [],
+          inventory: items,
+          fridgeImage: fridgeImage
         });
+        navigate('/inventory');
       } else {
-        dispatch({ type: 'SET_ERROR', error: 'No inventory data received' });
+        console.error('[ScanFlow] No review_inventory event found!');
+        dispatch({ type: 'SET_ERROR', error: 'upload_failed' });
       }
     } catch (err) {
-      dispatch({ type: 'SET_ERROR', error: err.message });
+      console.error('[ScanFlow] Error:', err);
+      dispatch({ type: 'SET_ERROR', error: navigator.onLine ? 'upload_failed' : 'network' });
     }
-  }, []);
+  }, [dispatch, navigate]);
 
-  const handleConfirmInventory = useCallback(async () => {
+  if (state.error && ['upload_failed', 'zero_items', 'network'].includes(state.error)) {
+    return (
+      <ErrorRecovery
+        type={state.error}
+        onRetry={() => dispatch({ type: 'SET_ERROR', error: null })}
+        onManual={() => {
+          dispatch({ type: 'SET_ERROR', error: null });
+          dispatch({ type: 'SET_INVENTORY', sessionId: 'manual', inventory: [] });
+          navigate('/inventory');
+        }}
+        onDismiss={() => dispatch({ type: 'SET_ERROR', error: null })}
+      />
+    );
+  }
+
+  return (
+    <>
+      {state.phase === 'analyzing' ? (
+        <PhotoUploader onUpload={handleUpload} isAnalyzing />
+      ) : (
+        <PhotoUploader onUpload={handleUpload} />
+      )}
+    </>
+  );
+}
+
+function InventoryFlow({ state, dispatch }) {
+  const navigate = useNavigate();
+
+  const handleConfirm = useCallback(async () => {
     dispatch({ type: 'START_RECIPE' });
+    navigate('/recipe');
     try {
       const result = await sendAction(state.sessionId, 'confirm_inventory', {
         edited_inventory: state.inventory,
@@ -151,12 +338,23 @@ export default function App() {
     } catch (err) {
       dispatch({ type: 'SET_ERROR', error: err.message });
     }
-  }, [state.sessionId, state.inventory, state.preferences]);
+  }, [state.sessionId, state.inventory, state.preferences, dispatch, navigate]);
 
-  const handleAcceptRecipe = useCallback(async () => {
+  return (
+    <InventoryGrid
+      items={state.inventory}
+      onConfirm={handleConfirm}
+      onRemoveItem={(name) => dispatch({ type: 'UPDATE_INVENTORY', inventory: state.inventory.filter(i => i.name !== name) })}
+      onAddItem={(item) => dispatch({ type: 'UPDATE_INVENTORY', inventory: [...state.inventory, item] })}
+    />
+  );
+}
+
+function RecipeFlow({ state, dispatch }) {
+  const handleAccept = useCallback(async () => {
     dispatch({ type: 'START_ACCEPT' });
     try {
-      const result = await sendAction(state.sessionId, 'accept_recipe');
+      const result = await sendAction(state.sessionId, 'accept_recipe', { recipe: state.recipe });
       const finalEvent = result.events.find(e => e.action === 'final_output');
       if (finalEvent) {
         dispatch({ type: 'ACCEPT_RECIPE', imageUrl: finalEvent.image_url });
@@ -164,132 +362,260 @@ export default function App() {
     } catch (err) {
       dispatch({ type: 'SET_ERROR', error: err.message });
     }
-  }, [state.sessionId]);
+  }, [state.sessionId, dispatch]);
 
-  const handleRejectRecipe = useCallback(async () => {
+  const handleReject = useCallback(async () => {
     dispatch({ type: 'REJECT_RECIPE' });
     try {
-      const result = await sendAction(state.sessionId, 'reject_recipe');
+      const result = await sendAction(state.sessionId, 'reject_recipe', { recipe: state.recipe });
       const recipeEvent = result.events.find(e => e.action === 'review_recipe');
       const freeInputEvent = result.events.find(e => e.action === 'free_input');
-      if (recipeEvent) {
-        dispatch({ type: 'SET_RECIPE', recipe: recipeEvent.recipe });
-      } else if (freeInputEvent) {
-        dispatch({ type: 'SET_ERROR', error: 'free_input' });
-      }
+      if (recipeEvent) dispatch({ type: 'SET_RECIPE', recipe: recipeEvent.recipe });
+      else if (freeInputEvent) dispatch({ type: 'SET_ERROR', error: 'free_input' });
     } catch (err) {
       dispatch({ type: 'SET_ERROR', error: err.message });
     }
-  }, [state.sessionId]);
+  }, [state.sessionId, dispatch]);
 
   const handleFreeInput = useCallback(async (text) => {
     dispatch({ type: 'START_RECIPE' });
     try {
-      const result = await sendAction(state.sessionId, 'free_input', { user_input: text });
+      const result = await sendAction(state.sessionId, 'free_input', { 
+        user_input: text,
+        recipe: state.recipe 
+      });
       const recipeEvent = result.events.find(e => e.action === 'review_recipe');
-      if (recipeEvent) {
-        dispatch({ type: 'SET_RECIPE', recipe: recipeEvent.recipe });
-      }
+      if (recipeEvent) dispatch({ type: 'SET_RECIPE', recipe: recipeEvent.recipe });
     } catch (err) {
       dispatch({ type: 'SET_ERROR', error: err.message });
     }
-  }, [state.sessionId]);
+  }, [state.sessionId, dispatch]);
 
-  const handleRemoveItem = useCallback((itemName) => {
-    dispatch({
-      type: 'UPDATE_INVENTORY',
-      inventory: state.inventory.filter(i => i.name !== itemName),
-    });
-  }, [state.inventory]);
+  if (state.error === 'recipe_failed' || (state.error && state.error !== 'free_input' && state.phase === 'generating')) {
+    return (
+      <ErrorRecovery
+        type="recipe_failed"
+        onRetry={() => {
+          dispatch({ type: 'SET_ERROR', error: null });
+          dispatch({ type: 'START_RECIPE' });
+        }}
+        onDismiss={() => dispatch({ type: 'SET_ERROR', error: null })}
+      />
+    );
+  }
 
-  const handleAddItem = useCallback((item) => {
-    dispatch({
-      type: 'UPDATE_INVENTORY',
-      inventory: [...state.inventory, item],
-    });
-  }, [state.inventory]);
-
-  /* --- Demo reset (Ctrl+Shift+R) --- */
-  const handleReset = useCallback(() => dispatch({ type: 'RESET' }), []);
-
-  /* --- Render current phase --- */
-  const renderPhase = () => {
-    switch (state.phase) {
-      case 'upload':
-        return <PhotoUploader onUpload={handleUpload} />;
-      case 'analyzing':
-        return <PhotoUploader onUpload={handleUpload} isAnalyzing />;
-      case 'inventory':
-        return (
-          <InventoryGrid
-            items={state.inventory}
-            onConfirm={handleConfirmInventory}
-            onRemoveItem={handleRemoveItem}
-            onAddItem={handleAddItem}
-          />
-        );
-      case 'generating':
-        return (
-          <div className="loading-state">
-            <div className="loading-icon">👨‍🍳</div>
-            <h2>Crafting the perfect recipe...</h2>
-            <p>Our chef is reviewing your ingredients and considering nutritional balance.</p>
-          </div>
-        );
-      case 'recipe':
-      case 'accepting':
-      case 'accepted':
-        return (
-          <RecipeCard
-            recipe={state.recipe}
-            imageUrl={state.recipeImage}
-            isAccepted={state.phase === 'accepted'}
-            isAccepting={state.phase === 'accepting'}
-            rejectCount={state.rejectCount}
-            onAccept={handleAcceptRecipe}
-            onReject={handleRejectRecipe}
-            onFreeInput={handleFreeInput}
-          />
-        );
-      default:
-        return <PhotoUploader onUpload={handleUpload} />;
-    }
-  };
+  if (state.phase === 'generating' && !state.recipe) {
+    return (
+      <div className="loading-state">
+        <div className="loading-icon">👨‍🍳</div>
+        <h2>Crafting the perfect recipe...</h2>
+        <p>Our chef is reviewing your ingredients and considering nutritional balance.</p>
+      </div>
+    );
+  }
 
   return (
-    <AppShell
-      onTogglePreferences={() => dispatch({ type: 'TOGGLE_PREFERENCES' })}
-      onReset={handleReset}
-      phase={state.phase}
-    >
-      <div className="app-layout">
-        <main className="main-content">
-          {state.error && state.error !== 'free_input' && (
-            <div className="error-banner">
-              <span>⚠️ {state.error}</span>
-              <button onClick={() => dispatch({ type: 'SET_ERROR', error: null })}>Dismiss</button>
-            </div>
-          )}
-          {renderPhase()}
-        </main>
-
-        {state.phase !== 'upload' && (
-          <aside className="trace-sidebar">
-            <AgentTraceTimeline steps={state.agentSteps} />
-          </aside>
-        )}
-      </div>
-
-      {state.showPreferences && (
-        <DietaryPreferencesModal
-          preferences={state.preferences}
-          onSave={(prefs) => {
-            dispatch({ type: 'SET_PREFERENCES', preferences: prefs });
-            dispatch({ type: 'TOGGLE_PREFERENCES' });
-          }}
-          onClose={() => dispatch({ type: 'TOGGLE_PREFERENCES' })}
-        />
+    <>
+      <RecipeCard
+        recipe={state.recipe}
+        imageUrl={state.recipeImage}
+        isAccepted={state.phase === 'accepted'}
+        isAccepting={state.phase === 'accepting'}
+        rejectCount={state.rejectCount}
+        onAccept={handleAccept}
+        onReject={handleReject}
+        onFreeInput={handleFreeInput}
+      />
+      {state.phase === 'accepted' && !state.showMealLogger && (
+        <div style={{ textAlign: 'center', marginTop: 'var(--space-4)' }}>
+          <button className="btn btn-primary" onClick={() => dispatch({ type: 'TOGGLE_MEAL_LOGGER' })}>
+            Log This Meal
+          </button>
+        </div>
       )}
-    </AppShell>
+      {state.showMealLogger && (
+        <div style={{ marginTop: 'var(--space-4)' }}>
+          <MealLogger
+            recipe={state.recipe}
+            onLog={(meal) => dispatch({ type: 'LOG_MEAL', meal })}
+            onCancel={() => dispatch({ type: 'TOGGLE_MEAL_LOGGER' })}
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ---------- App Root ---------- */
+function AppRoutes() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const navigate = useNavigate();
+
+  const handleReset = useCallback(() => {
+    dispatch({ type: 'RESET' });
+    navigate('/home');
+  }, [navigate]);
+
+  const inv = Array.isArray(state.inventory) ? state.inventory : [];
+  const lowItems = inv
+    .filter(i => i.days_until_expiry != null && i.days_until_expiry <= 3)
+    .map(i => i.name);
+
+  const showShell = state.hasOnboarded;
+
+  return (
+    <>
+      {showShell ? (
+        <AppShell
+          onTogglePreferences={() => dispatch({ type: 'TOGGLE_PREFERENCES' })}
+          onReset={handleReset}
+          phase={state.phase}
+        >
+          <div className="app-layout">
+            <main className="main-content">
+              {state.error && state.error !== 'free_input' && (
+                <div className="error-banner">
+                  <span>⚠ {state.error}</span>
+                  <button onClick={() => dispatch({ type: 'SET_ERROR', error: null })}>Dismiss</button>
+                </div>
+              )}
+
+              <Routes>
+                <Route path="/home" element={
+                  <>
+                    {lowItems.length > 0 && <RestockAlert lowItems={lowItems} />}
+                    <HomePage
+                      userProfile={state.userProfile}
+                      inventory={state.inventory}
+                      mealHistory={state.mealHistory}
+                    />
+
+                  </>
+                } />
+                <Route path="/scan" element={<ScanFlow state={state} dispatch={dispatch} />} />
+                <Route path="/inventory" element={<InventoryFlow state={state} dispatch={dispatch} />} />
+                <Route path="/recipe" element={<RecipeFlow state={state} dispatch={dispatch} />} />
+                <Route path="/shopping" element={
+                  <ShoppingList
+                    items={state.shoppingList}
+                    onToggle={(name) => dispatch({ type: 'TOGGLE_SHOPPING_ITEM', name })}
+                    onAdd={(item) => dispatch({ type: 'ADD_SHOPPING_ITEM', item })}
+                    onRemove={(name) => dispatch({ type: 'REMOVE_SHOPPING_ITEM', name })}
+                  />
+                } />
+                <Route path="/tracker" element={
+                  <MealTracker
+                    meals={state.mealHistory}
+                    onQuickLog={(meal) => dispatch({ type: 'LOG_MEAL', meal })}
+                    onEditMeal={(loggedAt, updated) => dispatch({ type: 'EDIT_MEAL', loggedAt, updated })}
+                    onDeleteMeal={(loggedAt) => dispatch({ type: 'DELETE_MEAL', loggedAt })}
+                    onSubmitCheckin={(recap) => dispatch({ type: 'SUBMIT_RECAP', recap })}
+                    checkinHistory={state.recapHistory}
+                  />
+                } />
+                <Route path="/chat" element={
+                  <NutritionistChat
+                    userProfile={state.userProfile}
+                    preferences={state.preferences}
+                    mealHistory={state.mealHistory}
+                    inventory={state.inventory}
+                    sessionId={state.sessionId}
+                    onGenerateRecipe={async () => {
+                      if (state.inventory.length === 0) {
+                        navigate('/scan');
+                        return;
+                      }
+                      // Ensure we have a session — create one if needed
+                      let sid = state.sessionId;
+                      if (!sid) {
+                        try {
+                          const res = await fetch('http://localhost:8000/api/session/new', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+                          const data = await res.json();
+                          sid = data.session_id;
+                          dispatch({ type: 'SET_INVENTORY', sessionId: sid, inventory: state.inventory });
+                        } catch (err) {
+                          dispatch({ type: 'SET_ERROR', error: 'Failed to start session' });
+                          return;
+                        }
+                      }
+                      dispatch({ type: 'START_RECIPE' });
+                      navigate('/recipe');
+                      try {
+                        const data = await generateRecipeFromInventory(state.inventory, state.preferences);
+                        if (data && data.recipe) {
+                          dispatch({ type: 'SET_RECIPE', recipe: data.recipe });
+                        } else {
+                          console.warn('[ChatRecipe] Invalid recipe response:', data);
+                          dispatch({ type: 'SET_ERROR', error: 'Recipe generation did not return a valid recipe. Please try again.' });
+                        }
+                      } catch (err) {
+                        console.error('[ChatRecipe] Error:', err);
+                        dispatch({ type: 'SET_ERROR', error: err.message });
+                      }
+                    }}
+                  />
+                } />
+                <Route path="/recap" element={
+                  <EndOfDayRecap
+                    meals={state.mealHistory.filter(m => m.loggedAt?.startsWith(new Date().toISOString().split('T')[0]))}
+                    onSubmit={(recap) => dispatch({ type: 'SUBMIT_RECAP', recap })}
+                  />
+                } />
+                <Route path="/progress" element={<ProgressTracker recapHistory={state.recapHistory} />} />
+                <Route path="*" element={<Navigate to="/home" replace />} />
+              </Routes>
+            </main>
+
+            {state.phase !== 'upload' && ['scan', 'inventory', 'recipe'].some(p => window.location.pathname.includes(p)) && (
+              <aside className="trace-sidebar">
+                <AgentTraceTimeline steps={state.agentSteps} />
+              </aside>
+            )}
+          </div>
+
+          {state.showPreferences && (
+            <DietaryPreferencesModal
+              preferences={state.preferences}
+              userProfile={state.userProfile}
+              onSave={(prefs) => {
+                dispatch({ type: 'SET_PREFERENCES', preferences: prefs });
+                dispatch({ type: 'TOGGLE_PREFERENCES' });
+              }}
+              onSaveProfile={(profile) => {
+                dispatch({ type: 'SET_PROFILE', profile });
+              }}
+              onClose={() => dispatch({ type: 'TOGGLE_PREFERENCES' })}
+            />
+          )}
+
+          <BottomNav />
+        </AppShell>
+      ) : (
+        <Routes>
+          <Route path="/" element={<WelcomeScreen />} />
+          <Route path="/onboarding" element={
+            <IntakeForm onComplete={(data) => dispatch({ type: 'COMPLETE_ONBOARDING', profile: data })} />
+          } />
+          <Route path="/fridge-capture" element={
+            <FridgeCapture onPhotosReady={() => { }} />
+          } />
+          <Route path="/grocery-prefs" element={
+            <GroceryPrefs onSelect={(pref) => dispatch({ type: 'SET_GROCERY_PREF', pref })} />
+          } />
+          <Route path="/generating" element={
+            <PlanGenerating onComplete={() => dispatch({ type: 'FINISH_GENERATING' })} />
+          } />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      )}
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }

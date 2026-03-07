@@ -36,11 +36,40 @@ export async function sendAction(sessionId, action, data = null) {
   return response.json();
 }
 
+export async function chatWithNutritionist(systemPrompt, messages) {
+  const response = await fetch(`${BASE_URL}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ system: systemPrompt, messages }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Chat failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.reply;
+}
+
 export async function getInventory(sessionId) {
   const response = await fetch(`${BASE_URL}/api/inventory/${sessionId}`);
 
   if (!response.ok) {
     throw new Error(`Inventory fetch failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function generateRecipeFromInventory(inventory, preferences = null) {
+  const response = await fetch(`${BASE_URL}/api/recipe/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ inventory, preferences }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Recipe generation failed: ${response.status}`);
   }
 
   return response.json();

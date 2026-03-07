@@ -1,14 +1,11 @@
-/* AgentTraceTimeline styles */
+/* AgentTraceTimeline styles — Eathos brand */
 
 .timeline-container {
   background: var(--color-white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--color-cream-dark);
-  overflow: hidden;
-  animation: fade-in 0.4s ease;
-  position: sticky;
-  top: calc(var(--header-height) + var(--space-6));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  animation: fade-in 0.3s ease;
 }
 
 .timeline-header {
@@ -16,46 +13,45 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: var(--space-4) var(--space-5);
   background: none;
-  color: var(--color-charcoal);
-  font-family: var(--font-heading);
-  font-weight: var(--weight-semibold);
+  color: var(--color-ink);
+  font-weight: var(--weight-medium);
   font-size: var(--text-sm);
+  padding: var(--space-2);
 }
 
 .timeline-title {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  font-weight: var(--weight-semibold);
 }
 
 .timeline-icon {
-  font-size: var(--text-lg);
+  font-size: var(--text-base);
 }
 
 .timeline-steps {
-  padding: 0 var(--space-5) var(--space-5);
-  display: flex;
-  flex-direction: column;
+  padding: var(--space-3) var(--space-2);
 }
 
 .timeline-step {
   display: flex;
   gap: var(--space-3);
-  min-height: 56px;
+  min-height: 48px;
 }
 
 .step-indicator {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 24px;
   flex-shrink: 0;
 }
 
 .step-dot {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -65,87 +61,66 @@
 }
 
 .dot-pending {
-  background: var(--color-cream-dark);
-  border: 2px solid var(--color-sage);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
 }
 
 .dot-active {
-  background: var(--color-forest-light);
-  border: 2px solid var(--color-forest);
+  background: var(--color-primary);
   color: var(--color-white);
   animation: pulse-dot 1.5s ease infinite;
-  box-shadow: var(--shadow-glow-forest);
+  box-shadow: var(--shadow-glow-primary);
 }
 
 .dot-complete {
-  background: var(--color-forest);
-  border: 2px solid var(--color-forest);
+  background: var(--color-primary);
   color: var(--color-white);
 }
 
 .dot-error {
-  background: var(--color-rose);
-  border: 2px solid var(--color-rose);
+  background: var(--color-berry);
+  color: var(--color-white);
 }
 
 .step-line {
   width: 2px;
   flex: 1;
-  background: var(--color-cream-dark);
+  background: var(--color-border);
   margin: var(--space-1) 0;
-  min-height: 20px;
+  min-height: 16px;
 }
 
 .status-complete .step-line {
-  background: var(--color-forest);
+  background: var(--color-primary-light);
 }
 
 .step-content {
   display: flex;
   flex-direction: column;
-  padding-top: 2px;
   gap: 2px;
+  padding-top: 2px;
+  padding-bottom: var(--space-3);
 }
 
 .step-name {
-  font-family: var(--font-heading);
-  font-weight: var(--weight-medium);
   font-size: var(--text-sm);
-  color: var(--color-charcoal);
-}
-
-.status-pending .step-name {
-  color: var(--color-charcoal-light);
+  font-weight: var(--weight-medium);
+  color: var(--color-ink);
 }
 
 .step-summary {
   font-size: var(--text-xs);
-  color: var(--color-charcoal-light);
+  color: var(--color-ink-light);
 }
 
-.status-active .step-summary {
-  color: var(--color-forest);
+.status-active .step-name {
+  color: var(--color-primary);
+}
+
+.status-error .step-name {
+  color: var(--color-berry);
 }
 
 .spin-icon {
   animation: spin 1s linear infinite;
-}
-
-/* Mobile: horizontal bottom bar */
-@media (max-width: 768px) {
-  .timeline-container {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    box-shadow: var(--shadow-lg);
-    z-index: 50;
-    max-height: 60vh;
-    overflow-y: auto;
-  }
-
-  .timeline-container.collapsed {
-    max-height: auto;
-  }
 }

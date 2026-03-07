@@ -6,14 +6,19 @@ Endpoints:
   GET  /api/inventory/{session_id} — Get current inventory for a session
 """
 
+# IMPORTANT: Load .env BEFORE any ADK/genai imports so the API key is available
+from pathlib import Path as _Path
+from dotenv import load_dotenv
+load_dotenv(_Path(__file__).parent / ".env", override=True)
+
 import json
 import os
 from contextlib import asynccontextmanager
 from typing import Optional
 
 import uvicorn
-from dotenv import load_dotenv
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
@@ -21,9 +26,6 @@ from google.genai import types
 from pydantic import BaseModel
 
 from .agent import root_agent
-
-# Load environment variables from .env
-load_dotenv()
 
 # --- Session Management ---
 session_service = InMemorySessionService()
@@ -51,6 +53,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Serve generated images as static files
+_images_dir = _Path(__file__).parent / "generated_images"
+_images_dir.mkdir(exist_ok=True)
+app.mount("/images", StaticFiles(directory=str(_images_dir)), name="images")
+
+# Serve uploaded fridge photos
+_uploads_dir = _Path(__file__).parent / "uploads"
+_uploads_dir.mkdir(exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(_uploads_dir)), name="uploads")
+
 
 class UserAction(BaseModel):
     """Request body for the /api/action endpoint."""
@@ -62,16 +74,34 @@ class UserAction(BaseModel):
 @app.post("/api/analyze")
 async def analyze_fridge(image: UploadFile = File(...)):
     """Upload a fridge photo to start a new session."""
+    print("\n" + "=" * 60)
+    print("[ANALYZE] Starting new analysis...")
+
     # Create a new session
     session = await session_service.create_session(
         app_name="fridge-recipe", user_id="user"
     )
     session_id = session.id
     _sessions[session_id] = session
+    print(f"[ANALYZE] Session created: {session_id}")
 
     # Read raw image bytes for the vision model
     image_bytes = await image.read()
     mime_type = image.content_type or "image/jpeg"
+    print(f"[ANALYZE] Image received: {len(image_bytes)} bytes, type={mime_type}")
+
+    # Save the uploaded image locally for persistence
+    ext = mime_type.split("/")[-1] if "/" in mime_type else "jpg"
+    if ext == "jpeg":
+        ext = "jpg"
+    
+    file_name = f"{session_id}.{ext}"
+    file_path = _uploads_dir / file_name
+    file_path.write_bytes(image_bytes)
+
+    # Persist the URL in session state
+    image_url = f"http://localhost:8000/uploads/{file_name}"
+    session.state["fridge_image_url"] = image_url
 
     # Send image to the orchestrator
     user_message = types.Content(
@@ -83,16 +113,39 @@ async def analyze_fridge(image: UploadFile = File(...)):
     )
 
     events = []
+    event_count = 0
     async for event in runner.run_async(
         session_id=session_id, user_id="user", new_message=user_message
     ):
+        event_count += 1
+        print(f"\n[EVENT #{event_count}] author={event.author}")
+        if event.actions and event.actions.state_delta:
+            print(f"  [STATE_DELTA] keys={list(event.actions.state_delta.keys())}")
+            for k, v in event.actions.state_delta.items():
+                preview = str(v)[:200] if v else "None"
+                print(f"    {k} = {preview}")
         if event.content and event.content.parts:
             for part in event.content.parts:
                 if part.text:
+                    print(f"  [TEXT] {part.text[:300]}...")
                     try:
-                        events.append(json.loads(part.text))
+                        parsed = json.loads(part.text)
+                        events.append(parsed)
+                        print(f"  [PARSED] action={parsed.get('action', 'N/A')}")
                     except json.JSONDecodeError:
                         events.append({"text": part.text})
+                        print(f"  [RAW TEXT] (not JSON)")
+
+    # Log final session state
+    print(f"\n[SESSION STATE after analyze]")
+    for k, v in session.state.items():
+        preview = str(v)[:200] if v else "None"
+        print(f"  {k} = {preview}")
+
+    print(f"\n[ANALYZE] Total events collected: {len(events)}")
+    for i, ev in enumerate(events):
+        print(f"  event[{i}] action={ev.get('action', 'N/A')}, keys={list(ev.keys())}")
+    print("=" * 60 + "\n")
 
     return {"session_id": session_id, "events": events}
 
@@ -107,7 +160,12 @@ async def user_action(action: UserAction):
         app_name="fridge-recipe", user_id="user", session_id=session_id
     )
     if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
+        print(f"[ACTION] Session {session_id} not found (likely server restart). Recreating.")
+        session = await session_service.create_session(
+            app_name="fridge-recipe", user_id="user"
+        )
+        session_id = session.id
+        _sessions[session_id] = session
 
     # Set the phase based on user action
     if action.action == "confirm_inventory":
@@ -118,10 +176,18 @@ async def user_action(action: UserAction):
             session.state["dietary_preferences"] = action.data["dietary_preferences"]
     elif action.action == "accept_recipe":
         session.state["phase"] = "accept_recipe"
+        if action.data and "recipe" in action.data:
+            session.state["recipe"] = action.data["recipe"]
     elif action.action == "reject_recipe":
         session.state["phase"] = "reject_recipe"
+        if action.data and "recipe" in action.data:
+            session.state["recipe"] = action.data["recipe"]
+        if action.data and "rejected_recipes" in action.data:
+            session.state["rejected_recipes"] = json.dumps(action.data["rejected_recipes"])
     elif action.action == "free_input":
         session.state["phase"] = "generate_recipe"
+        if action.data and "recipe" in action.data:
+            session.state["recipe"] = action.data["recipe"]
         if action.data and "user_input" in action.data:
             session.state["dietary_preferences"] = action.data["user_input"]
 
@@ -146,6 +212,135 @@ async def user_action(action: UserAction):
     return {"session_id": session_id, "events": events}
 
 
+class ChatRequest(BaseModel):
+    """Request body for the /api/chat endpoint (NutritionistChat)."""
+    system: str
+    messages: list  # [{role: "user"|"assistant", content: str}, ...]
+
+
+@app.post("/api/session/new")
+async def new_session():
+    """Create a new blank session for chatting."""
+    session = await session_service.create_session(
+        app_name="fridge-recipe", user_id="user"
+    )
+    _sessions[session.id] = session
+    return {"session_id": session.id}
+
+
+@app.post("/api/chat")
+async def chat(body: ChatRequest):
+    """Standalone nutritionist chat powered by Gemini."""
+    from google import genai
+
+    client = genai.Client()
+
+    # Build contents from message history
+    contents = []
+    for msg in body.messages:
+        role = "user" if msg.get("role") == "user" else "model"
+        contents.append(types.Content(
+            role=role,
+            parts=[types.Part(text=msg.get("content", ""))],
+        ))
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-3.1-pro-preview",
+            contents=contents,
+            config=types.GenerateContentConfig(
+                system_instruction=body.system,
+                temperature=0.7,
+            ),
+        )
+        reply = response.text or "I'm not sure how to respond to that."
+    except Exception as e:
+        print(f"[CHAT ERROR] {e}")
+        reply = "Sorry, I'm having trouble right now. Please try again."
+
+    return {"reply": reply}
+
+
+class RecipeGenerateRequest(BaseModel):
+    """Request body for direct recipe generation from inventory."""
+    inventory: list
+    preferences: Optional[dict] = None
+
+
+@app.post("/api/recipe/generate")
+async def generate_recipe(body: RecipeGenerateRequest):
+    """Generate a recipe directly from inventory — no session needed."""
+    from google import genai
+
+    client = genai.Client()
+
+    # Build the prompt matching the nutritionist agent's format
+    inv_str = json.dumps(body.inventory, indent=2)
+    prefs = body.preferences or {}
+    prefs_str = json.dumps(prefs) if prefs else "None specified"
+
+    prompt = f"""You are a Nutritionist agent. You receive the user's full kitchen 
+    inventory and must suggest a recipe.
+
+    **Prioritization rules (in order):**
+    1. USE EXPIRING ITEMS FIRST. If an item has days_until_expiry <= 2, it MUST be 
+       in the recipe. This is the #1 priority.
+    2. Maximize use of available inventory items — minimize "you need to buy" ingredients.
+    3. Balance nutrition: aim for protein + vegetables + carbs.
+    4. Keep it practical: prefer recipes under 45 minutes for weeknight cooking.
+
+    **Current inventory:** {inv_str}
+    **Dietary preferences:** {prefs_str}
+
+    **Your reasoning section must explicitly state:**
+    - Which items are expiring and how you used them
+    - Why this cuisine/preparation was chosen
+    - Any nutritional considerations
+
+    For each ingredient, set from_inventory to true if the ingredient is available
+    in the user's inventory, or false if the user would need to buy it.
+
+    Respond ONLY with valid JSON in this exact schema:
+    {{
+      "title": "string",
+      "cuisine": "string",
+      "difficulty": "easy|medium|hard",
+      "prep_time_minutes": number,
+      "cook_time_minutes": number,
+      "servings": number,
+      "ingredients": [
+        {{"name": "string", "quantity": number, "unit": "string", "from_inventory": boolean}}
+      ],
+      "steps": ["step 1", "step 2", ...],
+      "reasoning": "string explaining why this recipe",
+      "nutrition": {{
+        "calories": number,
+        "protein_g": number,
+        "carbs_g": number,
+        "fat_g": number
+      }},
+      "nutritional_gaps": "string or null"
+    }}"""
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-3.1-pro-preview",
+            contents=[types.Content(
+                role="user",
+                parts=[types.Part(text=prompt)],
+            )],
+            config=types.GenerateContentConfig(
+                temperature=0.7,
+                response_mime_type="application/json",
+            ),
+        )
+        recipe = json.loads(response.text)
+        return {"recipe": recipe}
+    except Exception as e:
+        print(f"[RECIPE GENERATE ERROR] {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/inventory/{session_id}")
 async def get_inventory(session_id: str):
     """Get the current inventory for a session."""
@@ -155,7 +350,10 @@ async def get_inventory(session_id: str):
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    return json.loads(session.state.get("inventory", "{}"))
+    return {
+        "inventory": json.loads(session.state.get("inventory", "[]")),
+        "fridge_image_url": session.state.get("fridge_image_url")
+    }
 
 
 if __name__ == "__main__":

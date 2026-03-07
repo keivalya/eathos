@@ -1,9 +1,14 @@
-import { useEffect, useCallback } from 'react';
-import { SlidersHorizontal, UtensilsCrossed } from 'lucide-react';
+import { useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { SlidersHorizontal } from 'lucide-react';
+import EathosLogo from './EathosLogo';
 import './AppShell.css';
 
 export default function AppShell({ children, onTogglePreferences, onReset, phase }) {
-  /* Demo reset: Ctrl+Shift+R or triple-tap logo */
+  const navigate = useNavigate();
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef(null);
+
   const handleKeyDown = useCallback((e) => {
     if (e.ctrlKey && e.shiftKey && e.key === 'R') {
       e.preventDefault();
@@ -16,17 +21,16 @@ export default function AppShell({ children, onTogglePreferences, onReset, phase
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  let tapCount = 0;
-  let tapTimer = null;
   const handleLogoClick = () => {
-    tapCount++;
-    if (tapCount === 3) {
-      tapCount = 0;
-      clearTimeout(tapTimer);
+    tapCountRef.current++;
+    if (tapCountRef.current === 3) {
+      tapCountRef.current = 0;
+      clearTimeout(tapTimerRef.current);
       onReset();
     } else {
-      clearTimeout(tapTimer);
-      tapTimer = setTimeout(() => { tapCount = 0; }, 600);
+      clearTimeout(tapTimerRef.current);
+      tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0; }, 600);
+      navigate('/home');
     }
   };
 
@@ -34,11 +38,11 @@ export default function AppShell({ children, onTogglePreferences, onReset, phase
     <div className="app-shell">
       <header className="app-header">
         <div className="header-left" onClick={handleLogoClick}>
-          <UtensilsCrossed size={24} className="header-logo-icon" />
-          <h1 className="header-title">FridgeChef</h1>
+          <EathosLogo size={36} color="var(--color-primary)" />
+          <h1 className="header-title">Eathos</h1>
         </div>
         <div className="header-right">
-          {phase !== 'upload' && (
+          {phase !== 'upload' && phase !== 'welcome' && (
             <span className="header-phase-badge">{formatPhase(phase)}</span>
           )}
           <button
@@ -65,7 +69,7 @@ function formatPhase(phase) {
     generating: 'Generating Recipe',
     recipe: 'Recipe Ready',
     accepting: 'Preparing...',
-    accepted: 'Let\'s Cook!',
+    accepted: "Let's Cook!",
   };
   return labels[phase] || '';
 }
