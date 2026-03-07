@@ -1,14 +1,11 @@
-"""FunctionTool for generating food images using Google Gemini / Imagen.
+"""FunctionTool for generating food images using Google Gemini.
 
-Supports two modes:
-  1. Gemini "Nano Banana" (gemini-2.5-flash-image) — uses generate_content
-  2. Imagen 4 (imagen-4.0-generate-001) — uses generate_images
+Supports three models in priority order:
+  1. gemini-2.0-flash-exp-image-generation (experimental, works on free tier)
+  2. gemini-2.5-flash-image / Nano Banana (paid tier only)
+  3. imagen-4.0-generate-001 / Imagen 4 (paid tier only)
 
-Falls back to a hardcoded Unsplash URL if generation fails.
-
-API key resolution order:
-  1. GEMINI_IMAGE_API_KEY (dedicated key for image gen, e.g. paid tier)
-  2. GEMINI_API_KEY / GOOGLE_API_KEY (auto-detected by genai.Client)
+Falls back to a hardcoded Unsplash URL if all models fail.
 """
 
 import os
@@ -26,11 +23,12 @@ IMAGES_DIR.mkdir(exist_ok=True)
 
 
 def _save_image_bytes(image_bytes: bytes, prefix: str = "recipe") -> str:
-    """Save raw image bytes to disk and return the file path."""
+    """Save raw image bytes to disk and return the serving URL."""
     filename = f"{prefix}_{uuid.uuid4().hex[:8]}.png"
     path = IMAGES_DIR / filename
     path.write_bytes(image_bytes)
-    return str(path)
+    # Return URL path that FastAPI StaticFiles will serve
+    return f"http://localhost:8000/images/{filename}"
 
 
 def _get_client() -> genai.Client:
@@ -41,11 +39,30 @@ def _get_client() -> genai.Client:
     return genai.Client()  # auto-detects from GEMINI_API_KEY etc.
 
 
+def _try_generate_content(client, model: str, prompt: str) -> str | None:
+    """Try generating an image via generate_content. Returns path or None."""
+    try:
+        response = client.models.generate_content(
+            model=model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_modalities=["IMAGE", "TEXT"],
+            ),
+        )
+
+        if response.candidates:
+            for part in response.candidates[0].content.parts:
+                if part.inline_data and part.inline_data.mime_type.startswith("image/"):
+                    image_bytes = part.inline_data.data
+                    return _save_image_bytes(image_bytes)
+        print(f"[ImageGen] {model} returned no image parts")
+    except Exception as e:
+        print(f"[ImageGen] {model} failed: {e}")
+    return None
+
+
 def generate_food_image(recipe_title: str, cuisine: str) -> str:
     """Generates or fetches an appetizing food image for the given recipe.
-
-    Uses Google Gemini Nano Banana (gemini-2.5-flash-image) as the primary
-    generator, with Imagen 4 and hardcoded fallbacks.
 
     Args:
         recipe_title: The name of the dish.
@@ -64,26 +81,17 @@ def generate_food_image(recipe_title: str, cuisine: str) -> str:
 
     client = _get_client()
 
-    # --- Option A: Gemini Nano Banana (generate_content with image output) ---
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash-image",
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_modalities=["IMAGE", "TEXT"],
-            ),
-        )
+    # --- Option A: Experimental model (works on free tier) ---
+    result = _try_generate_content(client, "gemini-2.0-flash-exp-image-generation", prompt)
+    if result:
+        return result
 
-        if response.candidates:
-            for part in response.candidates[0].content.parts:
-                if part.inline_data and part.inline_data.mime_type.startswith("image/"):
-                    image_bytes = part.inline_data.data
-                    return _save_image_bytes(image_bytes)
-        print("[ImageGen] Nano Banana returned no image parts")
-    except Exception as e:
-        print(f"[ImageGen] Nano Banana failed: {e}")
+    # --- Option B: Nano Banana (paid tier) ---
+    result = _try_generate_content(client, "gemini-2.5-flash-image", prompt)
+    if result:
+        return result
 
-    # --- Option B: Imagen 4 (generate_images API) ---
+    # --- Option C: Imagen 4 (paid tier) ---
     try:
         response = client.models.generate_images(
             model="imagen-4.0-generate-001",
@@ -102,7 +110,7 @@ def generate_food_image(recipe_title: str, cuisine: str) -> str:
     except Exception as e:
         print(f"[ImageGen] Imagen 4 failed: {e}")
 
-    # --- Option C: Hardcoded fallback ---
+    # --- Option D: Hardcoded fallback ---
     return "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800"
 
 
