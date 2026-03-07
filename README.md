@@ -1,87 +1,76 @@
-# Frontiers Fridge (Fridge-to-Recipe)
+# Eathos - Hackathon Project Summary
 
-**An AI-powered nutrition coach and meal planner that adapts to your day, inventory, and goals.**
+Frontiers Gen-AI Hackathon (MIT x Google DeepMind), March 2026
 
-Frontiers Fridge is a multi-agent application built to provide dynamic meal planning. By simply snapping a photo of your fridge or pantry, the app's AI agents analyze your inventory, factor in your dietary preferences, and generate personalized, nutritionally balanced recipes with clear reasoning.
+## Project
 
-## 🌟 Key Features
+Eathos is an AI nutritionist that goes from fridge photo to personalized meal decisions. It identifies ingredients, estimates freshness, reasons over nutrition and expiry, and generates recipe options for different people in the same household.
 
-- **Food Analyzer Agent:** Uses Gemini 2.5 Flash to identify food items from photos, extracting details like quantity, freshness metrics, confidence scores, and estimated days until expiry.
-- **Nutritionist Agent:** A strategic agent that plans meals based on expiring ingredients, inventory limits, dietary preferences (e.g., vegan, gluten-free), and nutritional balance.
-- **Agent Trace Timeline:** A transparent UI feature that shows step-by-step reasoning of what each AI agent is doing in real-time.
-- **Dietary Constraints Engine:** Built-in support for allergies and specific cuisine preferences.
-- **Image Generation:** Automatic, appetizing food image generation for the generated recipes.
-- **Robust Error Handling:** Built-in fallbacks and caching to ensure a seamless offline demo experience.
+Core idea: AI proposes, humans decide.
 
-## 🛠️ Tech Stack
+## Problem
 
-**Backend:**
-- Python 3.10+
-- [FastAPI](https://fastapi.tiangolo.com/) for routing and REST endpoints
-- Google ADK (Agent Development Kit)
-- **Models:** Google Gemini 2.5 Flash (Analysis & Generation), OpenAI DALL-E 3 (Image Generation)
+American households waste food largely due to kitchen decision gaps:
+- People do not know what is expiring soon.
+- People struggle to decide what to cook from what they already have.
+- Existing recipe apps start from recipe browsing instead of available inventory.
+- Families have mixed dietary needs across ages and health constraints.
 
-**Frontend:**
-- React 18
-- [Vite](https://vitejs.dev/)
-- [Tailwind CSS](https://tailwindcss.com/) for custom design tokens
-- [shadcn/ui](https://ui.shadcn.com/) components
-- React Router
+From the brief:
+- ~$1,500 food wasted per U.S. household per year.
+- ~$408B U.S. food waste annually.
+- 131M+ U.S. households affected.
+- 72% of consumers want AI meal planning.
 
----
+## Solution
 
-## 🚀 Getting Started
+Eathos uses a multi-agent AI pipeline to convert one fridge scan into practical meal plans:
+- Detects inventory with confidence scores and freshness signals.
+- Lets users confirm/edit detections before planning.
+- Prioritizes soon-to-expire items.
+- Produces recipe variants for different household members (for example, athlete + low-sodium senior).
+- Keeps users in control with explicit approval at each phase.
 
-Ensure you have Node.js and Python installed before proceeding.
+## How It Works
 
-### 1. Set up the Backend
-Navigate to the backend directory and set up your environment:
+1. Scan fridge or pantry with a photo (Gemini 2.5 Flash Vision).
+2. Confirm detected inventory (edit/remove low-confidence items).
+3. Run multi-agent reasoning across inventory, nutrition, and constraints.
+4. Review and approve recipe options (or reject and regenerate up to 3x).
+5. Export grocery gap list and deep-link checkout (Instacart).
 
-```bash
-cd backend
+## Demo Story
 
-# Create a virtual environment (optional but recommended)
-python3 -m venv .venv
-source .venv/bin/activate
+Maya (34) scans her fridge. Eathos detects 9+ ingredients and flags uncertain items. The nutritionist agent prioritizes expiring salmon and proposes recipe variants, including a low-sodium option for her mother Kamala (68). Maya reviews the visible reasoning, approves a recipe, gets a Telegram confirmation, and taps to order missing items for same-day delivery.
 
-# Install dependencies
-pip install -r requirements.txt
-```
+## Core Features
 
-**Configure Environment Variables:**
-Copy the example config and add your API keys. You will need a `GOOGLE_API_KEY` for Gemini, and optionally an `OPENAI_API_KEY` if you want dynamic image generation.
-```bash
-cp .env.example .env
-```
+- Fridge vision scan with confidence and freshness estimates.
+- Multi-agent pipeline: Food Analyzer -> Inventory Sync -> Nutritionist -> Image Generation.
+- Multi-generational adaptation from a single scan.
+- Human-in-the-loop checkpoints between agent phases.
+- Expiry-first planning to reduce waste.
 
-**Run the Server:**
-```bash
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
-```
-The backend will run on `http://localhost:8000`.
+## Tech Stack
 
-### 2. Set up the Frontend
-In a separate terminal, navigate to the frontend directory:
+- Gemini 2.5 Flash
+- Google ADK
+- Google Vision API
+- Instacart API
 
-```bash
-cd frontend
+## Team
 
-# Install packages
-npm install
+Red Huskies (Cornell x Northeastern)
+- Maria S.
+- Alexis Y.
+- Keivalya P.
+- Sanath U.
+- Kalyan M.
 
-# Start the development server
-npm run dev
-```
-The frontend will typically run on `http://localhost:5173`.
+## Hackathon Rubric Alignment
 
-## 🧠 Project Architecture
-
-The system uses an orchestrator pattern with stateful `BaseAgent` phases:
-1. **Analyze Phase:** The **Food Analyzer Agent** scans the uploaded fridge photo.
-2. **Review Inventory:** Items are parsed, synchronized via tools, and presented to the user for validation.
-3. **Generate Recipe Phase:** The **Nutritionist Agent** reads the confirmed inventory and preferences, deducts required items, and drafts a recipe.
-4. **Accept/Reject Loop:** The user can accept the recipe (which triggers the Image Generator) or reject it (which generates a new alternative via feedback).
-
----
-
-*This project was built for the Frontiers Hackathon Grand Challenge with a focus on single-responsibility engineering, reliable failure-choreography, and grounding AI responses cleanly through reasoning.*
+- UI/UX: clear guided flow from scan to decision.
+- Engineering: phased multi-agent orchestration with user checkpoints.
+- Grounding: confidence-scored detections + explicit inventory confirmation.
+- Innovation: multi-generational adaptation in one planning cycle.
+- Real-world fit: direct integration to grocery fulfillment and waste reduction.
