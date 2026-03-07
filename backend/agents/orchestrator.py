@@ -10,6 +10,10 @@ Manages the full fridge-to-recipe flow across multiple phases:
 
 Uses a custom BaseAgent (rather than SequentialAgent) because the flow has
 human-in-the-loop pauses that require yielding events and resuming later.
+
+IMPORTANT: State changes must go through EventActions(stateDelta=...) on
+yielded events — direct mutations to ctx.session.state are NOT persisted
+between turns by ADK's session service.
 """
 
 import json
@@ -18,6 +22,7 @@ from typing import AsyncGenerator
 from google.adk.agents import BaseAgent, LlmAgent
 from google.adk.agents.invocation_context import InvocationContext
 from google.adk.events import Event
+from google.adk.events.event_actions import EventActions
 from google.genai import types
 from typing_extensions import override
 
@@ -39,6 +44,19 @@ class FridgeRecipeOrchestrator(BaseAgent):
     food_analyzer: LlmAgent = food_analyzer_agent
     nutritionist: LlmAgent = nutritionist_agent
 
+    def _make_event(
+        self, message: dict, state_delta: dict | None = None
+    ) -> Event:
+        """Helper to create an Event with content and optional state delta."""
+        actions = EventActions(stateDelta=state_delta or {})
+        return Event(
+            author=self.name,
+            content=types.Content(
+                parts=[types.Part(text=json.dumps(message))]
+            ),
+            actions=actions,
+        )
+
     @override
     async def _run_async_impl(
         self, ctx: InvocationContext
@@ -59,23 +77,22 @@ class FridgeRecipeOrchestrator(BaseAgent):
             inventory_result = sync_inventory_tool.func(
                 detected if isinstance(detected, str) else json.dumps(detected)
             )
-            state["inventory"] = inventory_result
-            state["phase"] = "review_inventory"
 
-            # Yield inventory for user review
-            yield Event(
-                author=self.name,
-                content=types.Content(
-                    parts=[types.Part(text=json.dumps({
-                        "action": "review_inventory",
-                        "message": (
-                            "Here's what I found in your fridge. "
-                            "Please review and confirm by saying 'confirm', "
-                            "or tell me what to change."
-                        ),
-                        "inventory": json.loads(inventory_result),
-                    }))]
-                ),
+            # Yield inventory for user review — persist phase + inventory via stateDelta
+            yield self._make_event(
+                message={
+                    "action": "review_inventory",
+                    "message": (
+                        "Here's what I found in your fridge. "
+                        "Please review and confirm by saying 'confirm', "
+                        "or tell me what to change."
+                    ),
+                    "inventory": json.loads(inventory_result),
+                },
+                state_delta={
+                    "phase": "review_inventory",
+                    "inventory": inventory_result,
+                },
             )
             return  # Pause — wait for user confirmation
 
@@ -83,12 +100,66 @@ class FridgeRecipeOrchestrator(BaseAgent):
         # PHASE 1b: User reviews inventory (ADK web chat flow)
         # ============================================
         elif current_phase == "review_inventory":
-            # Any user message at this point is treated as confirmation
-            # (In production, you'd parse for edits vs. confirm)
+            # Any user message at this point is treated as confirmation.
+            # Update phase via stateDelta, then fall through to generate_recipe.
             state["phase"] = "generate_recipe"
-            # Fall through to generate_recipe
-            async for event in self._run_async_impl(ctx):
+            if "rejected_recipes" not in state:
+                state["rejected_recipes"] = "[]"
+            if "dietary_preferences" not in state:
+                state["dietary_preferences"] = "None specified"
+
+            # Emit a state-transition event so ADK persists the phase change
+            yield self._make_event(
+                message={
+                    "action": "status",
+                    "message": "Inventory confirmed! Generating a recipe for you...",
+                },
+                state_delta={
+                    "phase": "generate_recipe",
+                    "rejected_recipes": state.get("rejected_recipes", "[]"),
+                    "dietary_preferences": state.get("dietary_preferences", "None specified"),
+                },
+            )
+
+            # Run Nutritionist
+            async for event in self.nutritionist.run_async(ctx):
                 yield event
+
+            # Yield recipe for user review
+            yield self._make_event(
+                message={
+                    "action": "review_recipe",
+                    "message": "Here's a recipe suggestion. Say 'accept' or 'reject'!",
+                    "recipe": state.get("recipe"),
+                },
+                state_delta={"phase": "review_recipe"},
+            )
+            return  # Pause — wait for user accept/reject
+
+        # ============================================
+        # PHASE 2: User confirmed inventory → generate recipe (via FastAPI)
+        # ============================================
+        elif current_phase == "generate_recipe":
+            # Initialize rejected recipes list if not present
+            if "rejected_recipes" not in state:
+                state["rejected_recipes"] = "[]"
+            if "dietary_preferences" not in state:
+                state["dietary_preferences"] = "None specified"
+
+            # Run Nutritionist
+            async for event in self.nutritionist.run_async(ctx):
+                yield event
+
+            # Yield recipe for user review
+            yield self._make_event(
+                message={
+                    "action": "review_recipe",
+                    "message": "Here's a recipe suggestion. Say 'accept' or 'reject'!",
+                    "recipe": state.get("recipe"),
+                },
+                state_delta={"phase": "review_recipe"},
+            )
+            return  # Pause — wait for user accept/reject
 
         # ============================================
         # PHASE 3b: User reviews recipe (ADK web chat flow)
@@ -106,43 +177,20 @@ class FridgeRecipeOrchestrator(BaseAgent):
                         if user_text:
                             break
 
-            reject_keywords = ["reject", "no", "nah", "different", "another", "don't like", "try again"]
+            reject_keywords = [
+                "reject", "no", "nah", "different", "another",
+                "don't like", "try again", "something else",
+            ]
             if any(kw in user_text for kw in reject_keywords):
+                # Transition to reject flow
                 state["phase"] = "reject_recipe"
+                async for event in self._run_async_impl(ctx):
+                    yield event
             else:
+                # Transition to accept flow
                 state["phase"] = "accept_recipe"
-
-            async for event in self._run_async_impl(ctx):
-                yield event
-
-
-        # ============================================
-        # PHASE 2: User confirmed inventory → generate recipe
-        # ============================================
-        elif current_phase == "generate_recipe":
-            # Initialize rejected recipes list if not present
-            if "rejected_recipes" not in state:
-                state["rejected_recipes"] = "[]"
-            if "dietary_preferences" not in state:
-                state["dietary_preferences"] = "None specified"
-
-            # Run Nutritionist
-            async for event in self.nutritionist.run_async(ctx):
-                yield event
-
-            state["phase"] = "review_recipe"
-
-            yield Event(
-                author=self.name,
-                content=types.Content(
-                    parts=[types.Part(text=json.dumps({
-                        "action": "review_recipe",
-                        "message": "Here's a recipe suggestion. Accept or reject?",
-                        "recipe": state.get("recipe"),
-                    }))]
-                ),
-            )
-            return  # Pause — wait for user accept/reject
+                async for event in self._run_async_impl(ctx):
+                    yield event
 
         # ============================================
         # PHASE 3: User rejected → regenerate with context
@@ -157,28 +205,72 @@ class FridgeRecipeOrchestrator(BaseAgent):
                 else "unknown"
             )
             rejected.append(title)
-            state["rejected_recipes"] = json.dumps(rejected)
+            rejected_json = json.dumps(rejected)
+            state["rejected_recipes"] = rejected_json
 
             reject_count = len(rejected)
             if reject_count >= 3:
                 # After 3 rejects, ask user what they want
-                state["phase"] = "free_input"
-                yield Event(
-                    author=self.name,
-                    content=types.Content(
-                        parts=[types.Part(text=json.dumps({
-                            "action": "free_input",
-                            "message": (
-                                "I've suggested 3 recipes and none hit the mark. "
-                                "Tell me what you're in the mood for!"
-                            ),
-                        }))]
-                    ),
+                yield self._make_event(
+                    message={
+                        "action": "free_input",
+                        "message": (
+                            "I've suggested 3 recipes and none hit the mark. "
+                            "Tell me what you're in the mood for!"
+                        ),
+                    },
+                    state_delta={
+                        "phase": "free_input",
+                        "rejected_recipes": rejected_json,
+                    },
                 )
                 return
 
-            # Otherwise, regenerate
+            # Otherwise, regenerate — emit state update then re-enter
+            yield self._make_event(
+                message={
+                    "action": "status",
+                    "message": f"Got it, skipping that one. Suggesting something different... (attempt {reject_count + 1}/3)",
+                },
+                state_delta={
+                    "phase": "generate_recipe",
+                    "rejected_recipes": rejected_json,
+                },
+            )
             state["phase"] = "generate_recipe"
+            async for event in self._run_async_impl(ctx):
+                yield event
+
+        # ============================================
+        # PHASE 3c: Free input (ADK web chat flow, after 3 rejects)
+        # ============================================
+        elif current_phase == "free_input":
+            # User tells us what they want — store as dietary preferences
+            user_text = ""
+            if ctx.session.events:
+                for evt in reversed(ctx.session.events):
+                    if evt.content and evt.content.role == "user":
+                        for part in evt.content.parts:
+                            if part.text:
+                                user_text = part.text
+                                break
+                        if user_text:
+                            break
+
+            state["dietary_preferences"] = user_text or state.get("dietary_preferences", "None specified")
+            state["phase"] = "generate_recipe"
+
+            yield self._make_event(
+                message={
+                    "action": "status",
+                    "message": f"Great, I'll factor in your preference: '{user_text}'. Generating a new recipe...",
+                },
+                state_delta={
+                    "phase": "generate_recipe",
+                    "dietary_preferences": state["dietary_preferences"],
+                },
+            )
+
             async for event in self._run_async_impl(ctx):
                 yield event
 
@@ -200,27 +292,26 @@ class FridgeRecipeOrchestrator(BaseAgent):
 
             # Generate food image
             image_url = await generate_food_image_tool.func(title, cuisine)
-            state["recipe_image"] = image_url
 
             # Deduct ingredients from inventory
             if isinstance(recipe, dict) and "ingredients" in recipe:
                 deduct_ingredients_tool.func(json.dumps(recipe["ingredients"]))
 
-            state["phase"] = "complete"
-
-            yield Event(
-                author=self.name,
-                content=types.Content(
-                    parts=[types.Part(text=json.dumps({
-                        "action": "final_output",
-                        "message": "Here's your recipe! Happy cooking!",
-                        "recipe": recipe,
-                        "image_url": image_url,
-                        "nutritional_gaps": (
-                            recipe.get("nutritional_gaps")
-                            if isinstance(recipe, dict)
-                            else None
-                        ),
-                    }))]
-                ),
+            # Final output with all state persisted
+            yield self._make_event(
+                message={
+                    "action": "final_output",
+                    "message": "Here's your recipe! Happy cooking!",
+                    "recipe": recipe,
+                    "image_url": image_url,
+                    "nutritional_gaps": (
+                        recipe.get("nutritional_gaps")
+                        if isinstance(recipe, dict)
+                        else None
+                    ),
+                },
+                state_delta={
+                    "phase": "complete",
+                    "recipe_image": image_url,
+                },
             )
