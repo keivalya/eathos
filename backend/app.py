@@ -6,7 +6,6 @@ Endpoints:
   GET  /api/inventory/{session_id} — Get current inventory for a session
 """
 
-import base64
 import json
 import os
 from contextlib import asynccontextmanager
@@ -70,18 +69,15 @@ async def analyze_fridge(image: UploadFile = File(...)):
     session_id = session.id
     _sessions[session_id] = session
 
-    # Encode image as base64 for the vision model
+    # Read raw image bytes for the vision model
     image_bytes = await image.read()
-    image_b64 = base64.b64encode(image_bytes).decode("utf-8")
     mime_type = image.content_type or "image/jpeg"
 
     # Send image to the orchestrator
     user_message = types.Content(
         role="user",
         parts=[
-            types.Part.from_image(
-                image=types.Image(data=image_b64, mime_type=mime_type)
-            ),
+            types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
             types.Part(text="Analyze this fridge image and identify all food items."),
         ],
     )
