@@ -11,7 +11,7 @@ from ..models.shopping import ShoppingList
 
 shopping_agent = LlmAgent(
     name="ShoppingAgent",
-    model="gemini-2.5-flash",
+    model="gemini-3.1-pro-preview",
     instruction="""You are a Shopping Agent. You analyze the user's current inventory, 
     the nutritional gaps identified by the Nutritionist, and any missing recipe 
     ingredients to generate a prioritized shopping list.

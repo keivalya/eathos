@@ -58,6 +58,11 @@ _images_dir = _Path(__file__).parent / "generated_images"
 _images_dir.mkdir(exist_ok=True)
 app.mount("/images", StaticFiles(directory=str(_images_dir)), name="images")
 
+# Serve uploaded fridge photos
+_uploads_dir = _Path(__file__).parent / "uploads"
+_uploads_dir.mkdir(exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(_uploads_dir)), name="uploads")
+
 
 class UserAction(BaseModel):
     """Request body for the /api/action endpoint."""
@@ -79,6 +84,19 @@ async def analyze_fridge(image: UploadFile = File(...)):
     # Read raw image bytes for the vision model
     image_bytes = await image.read()
     mime_type = image.content_type or "image/jpeg"
+
+    # Save the uploaded image locally for persistence
+    ext = mime_type.split("/")[-1] if "/" in mime_type else "jpg"
+    if ext == "jpeg":
+        ext = "jpg"
+    
+    file_name = f"{session_id}.{ext}"
+    file_path = _uploads_dir / file_name
+    file_path.write_bytes(image_bytes)
+
+    # Persist the URL in session state
+    image_url = f"http://localhost:8000/uploads/{file_name}"
+    session.state["fridge_image_url"] = image_url
 
     # Send image to the orchestrator
     user_message = types.Content(
@@ -162,7 +180,10 @@ async def get_inventory(session_id: str):
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    return json.loads(session.state.get("inventory", "{}"))
+    return {
+        "inventory": json.loads(session.state.get("inventory", "[]")),
+        "fridge_image_url": session.state.get("fridge_image_url")
+    }
 
 
 if __name__ == "__main__":

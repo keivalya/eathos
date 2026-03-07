@@ -32,7 +32,7 @@ function loadState(key, fallback) {
 }
 
 function saveState(key, value) {
-  try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { }
 }
 
 /* ---------- State Machine ---------- */
@@ -44,6 +44,7 @@ const initialState = {
   phase: 'upload',
   sessionId: null,
   inventory: loadState('eathos_inventory', []),
+  fridgeImage: loadState('eathos_fridgeImage', null),
   recipe: null,
   recipeImage: null,
   preferences: loadState('eathos_preferences', { restrictions: [], cuisines: [], allergies: '' }),
@@ -85,8 +86,12 @@ function reducer(state, action) {
     case 'SET_INVENTORY': {
       const newInv = action.inventory;
       saveState('eathos_inventory', newInv);
+      if (action.fridgeImage) {
+        saveState('eathos_fridgeImage', action.fridgeImage);
+      }
       return {
         ...state, phase: 'inventory', sessionId: action.sessionId, inventory: newInv,
+        ...(action.fridgeImage ? { fridgeImage: action.fridgeImage } : {}),
         agentSteps: state.agentSteps.map(s => {
           if (s.id === 'analyzer') return { ...s, status: 'complete', summary: `Found ${newInv.length} items` };
           if (s.id === 'inventory') return { ...s, status: 'complete', summary: 'Inventory synced' };
@@ -199,12 +204,21 @@ function ScanFlow({ state, dispatch }) {
       const result = await analyzeImage(file);
       const inventoryEvent = result.events.find(e => e.action === 'review_inventory');
       if (inventoryEvent) {
-        const items = inventoryEvent.inventory?.inventory || inventoryEvent.inventory || [];
+        // Fetch the full inventory state to get the saved fridge_image_url
+        const inventoryState = await getInventory(result.session_id);
+        const items = inventoryState.inventory || [];
+        const fridgeImage = inventoryState.fridge_image_url || null;
+
         if (items.length === 0) {
           dispatch({ type: 'SET_ERROR', error: 'zero_items' });
           return;
         }
-        dispatch({ type: 'SET_INVENTORY', sessionId: result.session_id, inventory: items });
+        dispatch({
+          type: 'SET_INVENTORY',
+          sessionId: result.session_id,
+          inventory: items,
+          fridgeImage: fridgeImage
+        });
         navigate('/inventory');
       } else {
         dispatch({ type: 'SET_ERROR', error: 'upload_failed' });
@@ -461,7 +475,7 @@ function AppRoutes() {
             <IntakeForm onComplete={(data) => dispatch({ type: 'COMPLETE_ONBOARDING', profile: data })} />
           } />
           <Route path="/fridge-capture" element={
-            <FridgeCapture onPhotosReady={() => {}} />
+            <FridgeCapture onPhotosReady={() => { }} />
           } />
           <Route path="/grocery-prefs" element={
             <GroceryPrefs onSelect={(pref) => dispatch({ type: 'SET_GROCERY_PREF', pref })} />

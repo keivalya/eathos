@@ -12,7 +12,7 @@ from ..models.recipe import RecipeOutput
 
 nutritionist_agent = LlmAgent(
     name="NutritionistAgent",
-    model="gemini-2.5-flash",
+    model="gemini-3.1-pro-preview",
     instruction="""You are a Nutritionist agent. You receive the user's full kitchen 
     inventory and must suggest a recipe.
 
