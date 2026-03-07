@@ -14,6 +14,17 @@ export default function ShoppingList({ items = [], onToggle, onAdd, onRemove }) 
     setNewItem('');
   };
 
+  const handleCheckout = () => {
+    const itemsToBuy = items.filter(i => !i.checked).map(i => i.name);
+    if (itemsToBuy.length === 0) {
+      window.open('https://www.instacart.com', '_blank');
+      return;
+    }
+    // Instacart prefers comma separated values for multi-item searches
+    const query = encodeURIComponent(itemsToBuy.join(', '));
+    window.open(`https://www.instacart.com/store/s?k=${query}`, '_blank');
+  };
+
   return (
     <div className="shopping-list">
       <div className="shopping-header">
@@ -70,8 +81,8 @@ export default function ShoppingList({ items = [], onToggle, onAdd, onRemove }) 
           </button>
         </div>
 
-        <button className="btn btn-outline shopping-instacart">
-          <ShoppingCart size={16} /> Create Shopping Cart
+        <button className="btn btn-outline shopping-instacart" onClick={handleCheckout}>
+          <ExternalLink size={16} /> Checkout on Instacart
         </button>
       </div>
 
