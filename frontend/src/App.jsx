@@ -12,7 +12,6 @@ import InventoryGrid from './components/InventoryGrid';
 import RecipeCard from './components/RecipeCard';
 import AgentTraceTimeline from './components/AgentTraceTimeline';
 import DietaryPreferencesModal from './components/DietaryPreferencesModal';
-import ChatInterface from './components/ChatInterface';
 import MealLogger from './components/MealLogger';
 import ShoppingList from './components/ShoppingList';
 import MealTracker from './components/MealTracker';
@@ -337,32 +336,13 @@ function InventoryFlow({ state, dispatch }) {
     }
   }, [state.sessionId, state.inventory, state.preferences, dispatch, navigate]);
 
-  const items = Array.isArray(state.inventory) ? state.inventory : [];
-
-  const handleChatRecipe = useCallback((recipeEvent) => {
-    if (recipeEvent.recipe) {
-      dispatch({ type: 'SET_RECIPE', recipe: recipeEvent.recipe });
-      navigate('/recipe');
-    }
-  }, [dispatch, navigate]);
-
   return (
-    <>
-      <InventoryGrid
-        items={items}
-        onConfirm={handleConfirm}
-        onRemoveItem={(name) => dispatch({ type: 'UPDATE_INVENTORY', inventory: items.filter(i => i.name !== name) })}
-        onAddItem={(item) => dispatch({ type: 'UPDATE_INVENTORY', inventory: [...items, item] })}
-      />
-      {state.sessionId && (
-        <div style={{ marginTop: 'var(--space-6)' }}>
-          <ChatInterface
-            sessionId={state.sessionId}
-            onRecipeReady={handleChatRecipe}
-          />
-        </div>
-      )}
-    </>
+    <InventoryGrid
+      items={state.inventory}
+      onConfirm={handleConfirm}
+      onRemoveItem={(name) => dispatch({ type: 'UPDATE_INVENTORY', inventory: state.inventory.filter(i => i.name !== name) })}
+      onAddItem={(item) => dispatch({ type: 'UPDATE_INVENTORY', inventory: [...state.inventory, item] })}
+    />
   );
 }
 
@@ -502,18 +482,7 @@ function AppRoutes() {
                       inventory={state.inventory}
                       mealHistory={state.mealHistory}
                     />
-                    <div style={{ marginTop: 'var(--space-6)' }}>
-                      <ChatInterface
-                        sessionId={state.sessionId}
-                        onSessionCreated={(sid) => dispatch({ type: 'SET_INVENTORY', sessionId: sid, inventory: state.inventory || [] })}
-                        onRecipeReady={(ev) => {
-                          if (ev.recipe) {
-                            dispatch({ type: 'SET_RECIPE', recipe: ev.recipe });
-                            navigate('/recipe');
-                          }
-                        }}
-                      />
-                    </div>
+
                   </>
                 } />
                 <Route path="/scan" element={<ScanFlow state={state} dispatch={dispatch} />} />
