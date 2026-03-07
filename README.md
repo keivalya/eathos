@@ -1,76 +1,59 @@
-# Eathos - Hackathon Project Summary
+# Eathos — AI Nutritionist from a Fridge Scan
 
-Frontiers Gen-AI Hackathon (MIT x Google DeepMind), March 2026
+[Watch the Demo Video](https://github.com/user-attachments/assets/29aab976-ed9b-42a1-9278-96b9a7df43d8)
 
-## Project
+## Overview
 
-Eathos is an AI nutritionist that goes from fridge photo to personalized meal decisions. It identifies ingredients, estimates freshness, reasons over nutrition and expiry, and generates recipe options for different people in the same household.
+Eathos turns a single fridge photo into personalized meal decisions. It identifies ingredients, estimates freshness, reasons over nutrition and expiry, and recommends recipes for different people in the same household. **AI proposes, humans confirm.**
 
-Core idea: AI proposes, humans decide.
+## The Problem
 
-## Problem
+Food waste often starts with a simple daily question: *What can I make with what I already have?*
 
-American households waste food largely due to kitchen decision gaps:
+Households struggle because:
 - People do not know what is expiring soon.
-- People struggle to decide what to cook from what they already have.
-- Existing recipe apps start from recipe browsing instead of available inventory.
-- Families have mixed dietary needs across ages and health constraints.
+- Meal planning starts from browsing recipes, not real inventory.
+- Families often have mixed dietary needs, ages, and health constraints.
 
-From the brief:
-- ~$1,500 food wasted per U.S. household per year.
-- ~$408B U.S. food waste annually.
-- 131M+ U.S. households affected.
-- 72% of consumers want AI meal planning.
+## Our Solution
 
-## Solution
+Eathos uses a multi-agent AI pipeline to turn one fridge scan into practical, personalized meal plans.
 
-Eathos uses a multi-agent AI pipeline to convert one fridge scan into practical meal plans:
-- Detects inventory with confidence scores and freshness signals.
-- Lets users confirm/edit detections before planning.
-- Prioritizes soon-to-expire items.
-- Produces recipe variants for different household members (for example, athlete + low-sodium senior).
-- Keeps users in control with explicit approval at each phase.
+- detects inventory with confidence and freshness signals
+- lets users confirm or edit detections before planning
+- prioritizes soon-to-expire ingredients
+- generates recipe variants for different household members
+- keeps humans in control with approval checkpoints
 
 ## How It Works
 
-1. Scan fridge or pantry with a photo (Gemini 2.5 Flash Vision).
-2. Confirm detected inventory (edit/remove low-confidence items).
-3. Run multi-agent reasoning across inventory, nutrition, and constraints.
-4. Review and approve recipe options (or reject and regenerate up to 3x).
-5. Export grocery gap list and deep-link checkout (Instacart).
+1. Scan a fridge or pantry photo  
+2. Confirm detected inventory  
+3. Run multi-agent reasoning across ingredients, nutrition, and constraints  
+4. Review recipe options and approve or regenerate  
+5. Export missing items to a grocery gap list with **Instacart checkout**
 
-## Demo Story
+## Features
 
-Maya (34) scans her fridge. Eathos detects 9+ ingredients and flags uncertain items. The nutritionist agent prioritizes expiring salmon and proposes recipe variants, including a low-sodium option for her mother Kamala (68). Maya reviews the visible reasoning, approves a recipe, gets a Telegram confirmation, and taps to order missing items for same-day delivery.
-
-## Core Features
-
-- Fridge vision scan with confidence and freshness estimates.
-- Multi-agent pipeline: Food Analyzer -> Inventory Sync -> Nutritionist -> Image Generation.
-- Multi-generational adaptation from a single scan.
-- Human-in-the-loop checkpoints between agent phases.
-- Expiry-first planning to reduce waste.
-
-## Tech Stack
-
-- Gemini 2.5 Flash
-- Google ADK
-- Google Vision API
-- Instacart API
+- Fridge vision scan with confidence and freshness estimates
+- Multi-agent pipeline: Food Analyzer → Inventory Sync → Nutritionist → Image Generation
+- Personalized recipe variants for multi-generational households
+- Human-in-the-loop checkpoints between agent phases
+- Expiry-first planning to reduce food waste
 
 ## Team
 
-Red Huskies (Cornell x Northeastern)
+**Red Huskies (Cornell × Northeastern)**
 - Maria S.
 - Alexis Y.
 - Keivalya P.
 - Sanath U.
 - Kalyan M.
 
-## Hackathon Rubric Alignment
+## Why It Stands Out
 
-- UI/UX: clear guided flow from scan to decision.
-- Engineering: phased multi-agent orchestration with user checkpoints.
-- Grounding: confidence-scored detections + explicit inventory confirmation.
-- Innovation: multi-generational adaptation in one planning cycle.
-- Real-world fit: direct integration to grocery fulfillment and waste reduction.
+- **UI/UX:** simple, guided flow from scan to meal decision  
+- **Engineering:** structured multi-agent orchestration with checkpoints  
+- **Grounding:** confidence-based detection with user verification  
+- **Innovation:** one scan, multiple household-specific meal variants  
+- **Impact:** reduces waste while connecting directly to grocery fulfillment
