@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { ChefHat, RefreshCw, ChevronDown, ChevronUp, Check, UtensilsCrossed, Clock, Users, Flame, Send, Play } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChefHat, RefreshCw, ChevronDown, ChevronUp, Check, UtensilsCrossed, Clock, Users, Flame, Send, Play, ShoppingCart } from 'lucide-react';
+import ShoppingCartModal from './ShoppingCartModal';
 import './RecipeCard.css';
 
 function NutritionBar({ label, value, unit, max, color }) {
@@ -17,11 +18,20 @@ function NutritionBar({ label, value, unit, max, color }) {
 
 export default function RecipeCard({
   recipe, imageUrl, isAccepted, isAccepting, rejectCount,
-  onAccept, onReject, onFreeInput,
+  onAccept, onReject, onFreeInput, onAddToCart,
 }) {
   const [reasoningExpanded, setReasoningExpanded] = useState(false);
   const [freeText, setFreeText] = useState('');
+  const [showCart, setShowCart] = useState(false);
+  const [itemsOrdered, setItemsOrdered] = useState(false);
   const showFreeInput = rejectCount >= 3;
+
+  // Reset itemsOrdered if the recipe itself changes
+  useEffect(() => {
+    setItemsOrdered(false);
+  }, [recipe]);
+
+  const missingIngredients = recipe?.ingredients?.filter(ing => !ing.from_inventory) || [];
 
   if (!recipe) return null;
 
@@ -78,20 +88,40 @@ export default function RecipeCard({
 
       {/* Ingredients */}
       <div className="recipe-section" style={{ animationDelay: '200ms' }}>
-        <h3>Ingredients</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3>Ingredients</h3>
+          {missingIngredients.length > 0 && (
+            <button 
+              className="btn btn-outline btn-sm"
+              onClick={() => setShowCart(true)}
+              disabled={itemsOrdered}
+              style={{ fontSize: '0.8rem', padding: 'var(--space-1) var(--space-3)' }}
+            >
+              {itemsOrdered ? <Check size={14} style={{ marginRight: 'var(--space-1)' }} className="text-green" /> : <ShoppingCart size={14} style={{ marginRight: 'var(--space-1)' }}/>}
+              {itemsOrdered ? 'Added to Cart' : `Shop Missing (${missingIngredients.length})`}
+            </button>
+          )}
+        </div>
         <ul className="ingredients-list">
-          {recipe.ingredients?.map((ing, i) => (
-            <li key={i} className={`ingredient-item ${ing.is_expiring ? 'expiring' : ''}`}>
-              <span className="ingredient-check">
-                {ing.from_inventory ? <Check size={14} className="check-icon" /> : <span className="buy-dot" />}
-              </span>
-              <span className="ingredient-text">
-                {ing.quantity} {ing.unit} {ing.name}
-              </span>
-              {ing.is_expiring && <span className="expiring-tag">⚡ Use today</span>}
-              {!ing.from_inventory && <span className="buy-tag">Need to buy</span>}
-            </li>
-          ))}
+          {recipe.ingredients?.map((ing, i) => {
+            const isMissing = !ing.from_inventory;
+            return (
+              <li key={i} className={`ingredient-item ${ing.is_expiring ? 'expiring' : ''}`}>
+                <span className="ingredient-check">
+                  {!isMissing || itemsOrdered ? <Check size={14} className="check-icon" /> : <span className="buy-dot" />}
+                </span>
+                <span className="ingredient-text">
+                  {ing.quantity} {ing.unit} {ing.name}
+                </span>
+                {ing.is_expiring && <span className="expiring-tag">⚡ Use today</span>}
+                {isMissing && (
+                  itemsOrdered ? 
+                    <span className="buy-tag" style={{background: 'var(--color-bg-warm)', color: 'var(--color-forest)'}}>✓ In cart</span> : 
+                    <span className="buy-tag">Need to buy</span>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
 
@@ -183,6 +213,17 @@ export default function RecipeCard({
           <ChefHat size={24} />
           <span>Happy cooking! 🎉</span>
         </div>
+      )}
+
+      {showCart && (
+        <ShoppingCartModal 
+          missingIngredients={missingIngredients} 
+          onClose={() => setShowCart(false)} 
+          onAddToCart={() => {
+            if (onAddToCart) onAddToCart(missingIngredients);
+            setItemsOrdered(true);
+          }}
+        />
       )}
     </div>
   );
