@@ -1,0 +1,104 @@
+{
+  "inventory": [
+    {
+      "name": "Chicken Breast",
+      "category": "protein",
+      "quantity": 2,
+      "unit": "count",
+      "freshness": "nearing_expiry",
+      "days_until_expiry": 1,
+      "confidence": 0.94,
+      "status": "AVAILABLE"
+    },
+    {
+      "name": "Bell Peppers",
+      "category": "produce",
+      "quantity": 3,
+      "unit": "count",
+      "freshness": "fresh",
+      "days_until_expiry": 5,
+      "confidence": 0.91,
+      "status": "AVAILABLE"
+    },
+    {
+      "name": "Jasmine Rice",
+      "category": "grain",
+      "quantity": 500,
+      "unit": "grams",
+      "freshness": "fresh",
+      "days_until_expiry": 90,
+      "confidence": 0.87,
+      "status": "AVAILABLE"
+    },
+    {
+      "name": "Broccoli",
+      "category": "produce",
+      "quantity": 1,
+      "unit": "count",
+      "freshness": "fresh",
+      "days_until_expiry": 4,
+      "confidence": 0.92,
+      "status": "AVAILABLE"
+    },
+    {
+      "name": "Eggs",
+      "category": "protein",
+      "quantity": 6,
+      "unit": "count",
+      "freshness": "fresh",
+      "days_until_expiry": 10,
+      "confidence": 0.96,
+      "status": "AVAILABLE"
+    },
+    {
+      "name": "Soy Sauce",
+      "category": "condiment",
+      "quantity": 200,
+      "unit": "ml",
+      "freshness": "fresh",
+      "days_until_expiry": 180,
+      "confidence": 0.88,
+      "status": "AVAILABLE"
+    },
+    {
+      "name": "Garlic",
+      "category": "produce",
+      "quantity": 1,
+      "unit": "count",
+      "freshness": "fresh",
+      "days_until_expiry": 14,
+      "confidence": 0.82,
+      "status": "AVAILABLE"
+    },
+    {
+      "name": "Ginger Root",
+      "category": "produce",
+      "quantity": 1,
+      "unit": "count",
+      "freshness": "nearing_expiry",
+      "days_until_expiry": 2,
+      "confidence": 0.73,
+      "status": "AVAILABLE"
+    },
+    {
+      "name": "Milk",
+      "category": "dairy",
+      "quantity": 500,
+      "unit": "ml",
+      "freshness": "nearing_expiry",
+      "days_until_expiry": 2,
+      "confidence": 0.90,
+      "status": "AVAILABLE"
+    },
+    {
+      "name": "Mystery Container",
+      "category": "other",
+      "quantity": 1,
+      "unit": "count",
+      "freshness": "unknown",
+      "days_until_expiry": -1,
+      "confidence": 0.45,
+      "status": "AVAILABLE"
+    }
+  ]
+}

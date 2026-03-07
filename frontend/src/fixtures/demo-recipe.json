@@ -1,0 +1,37 @@
+{
+  "title": "Ginger Chicken Stir-Fry with Broccoli",
+  "cuisine": "Asian",
+  "difficulty": "easy",
+  "prep_time_minutes": 15,
+  "cook_time_minutes": 20,
+  "servings": 2,
+  "ingredients": [
+    { "name": "Chicken Breast", "quantity": 2, "unit": "count", "from_inventory": true, "is_expiring": true },
+    { "name": "Ginger Root", "quantity": 1, "unit": "thumb", "from_inventory": true, "is_expiring": true },
+    { "name": "Broccoli", "quantity": 1, "unit": "head", "from_inventory": true, "is_expiring": false },
+    { "name": "Bell Peppers", "quantity": 2, "unit": "count", "from_inventory": true, "is_expiring": false },
+    { "name": "Garlic", "quantity": 3, "unit": "cloves", "from_inventory": true, "is_expiring": false },
+    { "name": "Soy Sauce", "quantity": 3, "unit": "tbsp", "from_inventory": true, "is_expiring": false },
+    { "name": "Jasmine Rice", "quantity": 200, "unit": "grams", "from_inventory": true, "is_expiring": false },
+    { "name": "Sesame Oil", "quantity": 1, "unit": "tbsp", "from_inventory": false, "is_expiring": false }
+  ],
+  "steps": [
+    "Cook jasmine rice according to package directions and set aside.",
+    "Slice chicken breast into thin strips and season with a pinch of salt.",
+    "Mince garlic and grate ginger root finely.",
+    "Heat sesame oil in a wok over high heat until shimmering.",
+    "Stir-fry chicken strips for 4-5 minutes until golden and cooked through. Remove and set aside.",
+    "In the same wok, add bell peppers and broccoli florets. Stir-fry for 3 minutes.",
+    "Add garlic and ginger, cook for 30 seconds until fragrant.",
+    "Return chicken to the wok, add soy sauce, and toss everything together for 1 minute.",
+    "Serve hot over jasmine rice."
+  ],
+  "reasoning": "This recipe prioritizes your chicken breast (expires tomorrow) and ginger root (expires in 2 days) as the star ingredients. The stir-fry technique is quick and brings out the ginger's brightness. Bell peppers and broccoli add color, crunch, and essential vitamins. The dish uses 7 of your 10 inventory items, minimizing waste. Only sesame oil needs purchasing — everything else comes from your fridge.",
+  "nutrition": {
+    "calories": 520,
+    "protein_g": 42,
+    "carbs_g": 58,
+    "fat_g": 12
+  },
+  "nutritional_gaps": "Your inventory is low on leafy greens (no spinach, kale, or lettuce) and healthy fats (no avocado, nuts, or olive oil). Consider adding a side salad for fiber."
+}

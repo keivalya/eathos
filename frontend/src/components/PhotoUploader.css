@@ -1,0 +1,215 @@
+/* PhotoUploader styles */
+
+.uploader-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - var(--header-height) - var(--space-12));
+  padding: var(--space-6);
+}
+
+.drop-zone {
+  width: 100%;
+  max-width: 640px;
+  min-height: 420px;
+  border: 2px dashed var(--color-sage);
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  background: var(--color-white);
+  position: relative;
+}
+
+.drop-zone:hover {
+  border-color: var(--color-forest-light);
+  background: rgba(46, 107, 79, 0.02);
+  box-shadow: var(--shadow-md);
+}
+
+.drop-zone.drag-over {
+  border-color: var(--color-forest);
+  border-style: solid;
+  background: rgba(46, 107, 79, 0.05);
+  box-shadow: var(--shadow-glow-forest);
+  transform: scale(1.01);
+}
+
+.file-input {
+  display: none;
+}
+
+.drop-zone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-8);
+  gap: var(--space-4);
+}
+
+.drop-zone-icon {
+  color: var(--color-sage);
+  margin-bottom: var(--space-2);
+}
+
+.drop-zone-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-charcoal);
+  line-height: var(--leading-tight);
+}
+
+.drop-zone-subtitle {
+  font-size: var(--text-base);
+  color: var(--color-charcoal-light);
+  max-width: 320px;
+}
+
+.drop-zone-buttons {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+/* Shared button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  font-family: var(--font-heading);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-base);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--color-forest);
+  color: var(--color-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  background: var(--color-forest-light);
+  box-shadow: var(--shadow-glow-forest);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-terracotta);
+  border: 2px solid var(--color-terracotta);
+}
+
+.btn-outline:hover {
+  background: rgba(199, 91, 57, 0.05);
+  box-shadow: var(--shadow-glow-terracotta);
+}
+
+.btn-secondary {
+  background: var(--color-cream-dark);
+  color: var(--color-charcoal);
+}
+
+.btn-secondary:hover {
+  background: var(--color-sage);
+  color: var(--color-white);
+}
+
+.btn-danger {
+  background: var(--color-rose);
+  color: var(--color-white);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: inline-flex;
+  }
+
+  .drop-zone {
+    min-height: 320px;
+  }
+
+  .drop-zone-title {
+    font-size: var(--text-2xl);
+  }
+
+  .drop-zone-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn {
+    justify-content: center;
+  }
+}
+
+/* Analyzing state */
+.uploader-analyzing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - var(--header-height) - var(--space-12));
+  position: relative;
+  padding: var(--space-6);
+}
+
+.analyzing-preview {
+  width: 100%;
+  max-width: 500px;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: var(--radius-xl);
+  filter: brightness(0.7);
+}
+
+.analyzing-overlay {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  animation: fade-in 0.4s ease;
+}
+
+.analyzing-overlay h2 {
+  color: var(--color-white);
+  font-size: var(--text-2xl);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.analyzing-overlay p {
+  color: rgba(255,255,255,0.85);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.analyzing-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-forest-light);
+  animation: pulse-dot 1.5s ease infinite;
+  box-shadow: var(--shadow-glow-forest);
+}

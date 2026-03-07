@@ -1,0 +1,86 @@
+/* =====================================================
+   App-level layout styles
+   ===================================================== */
+
+.app-layout {
+  display: flex;
+  gap: var(--space-6);
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-6);
+  min-height: calc(100vh - var(--header-height));
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.trace-sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+}
+
+/* Error Banner */
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-amber-light);
+  color: var(--color-charcoal);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-sm);
+  animation: fade-in 0.3s ease;
+}
+
+.error-banner button {
+  background: none;
+  color: var(--color-charcoal);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-decoration: underline;
+  padding: var(--space-1) var(--space-2);
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-16) var(--space-6);
+  animation: fade-in 0.4s ease;
+}
+
+.loading-state .loading-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-4);
+  animation: pulse-dot 2s ease infinite;
+}
+
+.loading-state h2 {
+  font-family: var(--font-heading);
+  color: var(--color-charcoal);
+  margin-bottom: var(--space-2);
+}
+
+.loading-state p {
+  color: var(--color-charcoal-light);
+  max-width: 400px;
+}
+
+/* Mobile: sidebar becomes bottom panel */
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+    padding: var(--space-4);
+  }
+
+  .trace-sidebar {
+    width: 100%;
+    order: 2;
+  }
+}

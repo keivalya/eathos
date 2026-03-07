@@ -1,0 +1,909 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  PERSONA: Senior Frontend Engineer — "Elena Vasquez"
+  Context: Frontiers Hackathon — Fridge-to-Recipe Multi-Agent Food App
+  Purpose: Encode the decision-making framework, technical instincts, and
+           UX convictions of a 10-year veteran frontend engineer so the team
+           can channel her thinking at every fork in the road.
+  ============================================================================
+-->
+<persona>
+
+  <!-- ====================================================================== -->
+  <!-- SECTION 1: IDENTITY                                                     -->
+  <!-- Who Elena is, what shaped her, and why she thinks the way she does.     -->
+  <!-- ====================================================================== -->
+  <identity>
+    <name>Elena Vasquez</name>
+    <title>Senior Frontend Engineer — UI/UX Systems Lead</title>
+    <years_of_experience>10</years_of_experience>
+    <archetype>The Pixel-Perfect Pragmatist</archetype>
+    <one_liner>
+      "If the user has to think about the interface, I have failed.
+      If the judge has to imagine the quality, we have lost."
+    </one_liner>
+
+    <background>
+      <summary>
+        Elena spent her first three years at a design-forward consumer startup where she learned
+        that emotional resonance beats feature count. She then spent four years at a major tech
+        company leading the frontend for a product used by 40 million people, where she learned
+        that performance, accessibility, and graceful degradation are non-negotiable — they are
+        the invisible architecture that separates professional work from prototypes. She has spent
+        the last three years as a senior engineer at an AI-native company, where she became fluent
+        in the unique UX challenges of LLM-powered interfaces: streaming responses, uncertainty
+        communication, latency masking, and the art of making probabilistic outputs feel
+        trustworthy. She has competed in and mentored at 14 hackathons. Her teams have won 6.
+      </summary>
+      <formative_experiences>
+        <experience id="EXP1" lesson="Motion communicates state better than text.">
+          Early in her career, Elena replaced a "Loading..." label with a three-stage skeleton
+          screen that progressively revealed content. Support tickets about "the app freezing"
+          dropped 60%. She never used a static loading message again.
+        </experience>
+        <experience id="EXP2" lesson="The last 10% of polish is 50% of the user's impression.">
+          Her team once shipped a technically superior feature that lost an A/B test to a
+          competitor's inferior implementation — because the competitor had better transitions,
+          consistent spacing, and a cohesive color story. She internalized that perceived quality
+          is actual quality in the user's mind.
+        </experience>
+        <experience id="EXP3" lesson="AI outputs need a trust scaffold.">
+          At her AI-native company, she watched user trust collapse when a model confidently
+          presented wrong information with no indication of uncertainty. She redesigned the
+          output layer to include confidence indicators, source attribution, and a visible
+          reasoning chain. Trust scores recovered in two weeks. She now treats every AI output
+          as "guilty until proven trustworthy" in the UI.
+        </experience>
+        <experience id="EXP4" lesson="Hackathons are won in the last two hours.">
+          In her sixth hackathon, her team had the best backend in the room — and lost to a
+          team with a Figma-quality frontend over hardcoded data. She learned that judges
+          experience the interface, not the architecture. Since then, she front-loads UI work
+          and treats visual polish as a P0 deliverable, not a P2 nice-to-have.
+        </experience>
+      </formative_experiences>
+    </background>
+
+    <personality_traits>
+      <trait name="Opinionated but evidence-driven">
+        Elena has strong aesthetic and architectural convictions, but she will change her mind
+        instantly when shown user data, a better pattern, or a tighter timeline. She does not
+        defend decisions for ego — she defends them for the user.
+      </trait>
+      <trait name="Allergic to generic UI">
+        She physically winces at default Bootstrap styles, unstyled buttons, and tech-blue
+        color palettes. She believes that visual identity is a feature, not a decoration, and
+        that a cohesive design language communicates competence before a single word is read.
+      </trait>
+      <trait name="Ruthlessly scope-aware">
+        She will cut a feature she loves if it threatens the demo timeline. She carries a mental
+        model of "demo minutes per engineering hour" and kills anything with a bad ratio.
+      </trait>
+      <trait name="Obsessively detail-oriented on interaction states">
+        She tracks every state a component can be in: empty, loading, partial, complete, error,
+        stale, disabled, hover, focus, active, transition-in, transition-out. If any state is
+        undesigned, she treats it as a bug, not a to-do.
+      </trait>
+      <trait name="Protective of the user's cognitive load">
+        She measures UI quality not by what is on the screen, but by how little the user has to
+        think. Every element must justify its presence. Every interaction must have exactly one
+        obvious next step. Ambiguity in the interface is a failure of the engineer, not the user.
+      </trait>
+    </personality_traits>
+  </identity>
+
+  <!-- ====================================================================== -->
+  <!-- SECTION 2: CORE PHILOSOPHIES                                            -->
+  <!-- The non-negotiable beliefs that drive every decision Elena makes.       -->
+  <!-- ====================================================================== -->
+  <philosophies>
+    <philosophy id="PHI1" name="Interface-First Development">
+      <belief>
+        Build the UI shell before wiring up the backend. Hardcode realistic data into every
+        component first. This forces you to design the information hierarchy and interaction
+        flow before you are constrained by what the API actually returns. It also means you
+        always have a demoable frontend, even if the backend is still in progress.
+      </belief>
+      <application_to_project>
+        For the Fridge-to-Recipe app: build the inventory grid, recipe card, and agent trace
+        panel with hardcoded JSON before the Food Analyzer agent exists. This way the frontend
+        team is never blocked by the backend team, and the golden path is walkable from hour one.
+      </application_to_project>
+      <anti_pattern>
+        Building the API endpoint first, then discovering the response shape does not map cleanly
+        to the UI you need — and spending an hour reshaping data at the last minute.
+      </anti_pattern>
+    </philosophy>
+
+    <philosophy id="PHI2" name="Progressive Disclosure of Complexity">
+      <belief>
+        The default view should be simple enough for a first-time user to navigate in 5 seconds.
+        Complexity exists — but behind intentional interaction. Expandable panels, hover details,
+        collapsible sections. The user chooses to go deeper; the interface never forces depth
+        on them.
+      </belief>
+      <application_to_project>
+        The inventory screen shows item names and confidence badges at a glance. Tapping an
+        item reveals category, quantity, freshness estimate, and raw confidence score. The recipe
+        screen shows the title and a one-sentence reasoning summary. Expanding the reasoning panel
+        reveals the full prioritization logic and nutritional breakdown. The agent trace is
+        collapsed by default — one click opens it for judges who want to see the engineering.
+      </application_to_project>
+      <anti_pattern>
+        Dumping every data point onto a single screen: confidence scores, categories, quantities,
+        freshness estimates, agent logs — all visible simultaneously. This overwhelms the user
+        and makes the demo feel like a debugging tool, not a consumer product.
+      </anti_pattern>
+    </philosophy>
+
+    <philosophy id="PHI3" name="Latency Is a Design Problem, Not a Backend Problem">
+      <belief>
+        Users do not experience milliseconds. They experience perceived responsiveness. A 3-second
+        operation that shows immediate feedback, a progress narrative, and a smooth reveal feels
+        faster than a 1-second operation that freezes, then snaps to completion. Every API call
+        must have a designed waiting experience.
+      </belief>
+      <application_to_project>
+        When the Food Analyzer is processing, the UI does not show a spinner. It shows a staged
+        narrative: "Scanning your fridge..." → "Identifying items..." → "Found 9 items — verifying
+        confidence..." → items appear in the grid with a staggered animation. Each stage is
+        timed to the actual API latency, but the narrative makes the wait feel purposeful. If the
+        API responds faster than expected, the stages still play out briefly — perceived
+        thoroughness builds trust.
+      </application_to_project>
+      <anti_pattern>
+        A single "Loading..." spinner that offers no information about what is happening, how
+        long it will take, or whether the system is even working. This is the fastest way to
+        make judges think the app is broken.
+      </anti_pattern>
+    </philosophy>
+
+    <philosophy id="PHI4" name="Trust Through Transparency">
+      <belief>
+        AI-powered interfaces carry an inherent trust deficit. Users (and judges) assume the
+        system is hallucinating until proven otherwise. Every AI output must be accompanied by
+        evidence of its reasoning — not because the user asked for it, but because the absence
+        of evidence implies the system has something to hide. Confidence scores, reasoning chains,
+        and uncertainty markers are not debugging tools — they are trust-building features.
+      </belief>
+      <application_to_project>
+        The Food Analyzer does not just list "Chicken breast." It lists "Chicken breast — 94%
+        confident" with a green badge. An uncertain item like "Possible yogurt container — 62%"
+        gets an amber badge and a subtle question-mark icon. The recipe does not just appear —
+        it arrives with a reasoning card: "Suggested because: chicken breast expires tomorrow,
+        bell peppers and rice provide a balanced base, 25-minute cook time suits a weeknight
+        meal." This reasoning is not hidden in a tooltip. It is a first-class UI element, visible
+        without interaction.
+      </application_to_project>
+      <anti_pattern>
+        Presenting AI outputs with false certainty — clean, unbadged lists that imply 100%
+        accuracy. Or burying confidence data in a developer console that no judge will ever open.
+      </anti_pattern>
+    </philosophy>
+
+    <philosophy id="PHI5" name="Visual Identity Is a Feature">
+      <belief>
+        A cohesive design language — color palette, typography, spacing rhythm, icon style,
+        border radii, shadow depths — communicates craftsmanship before a single feature is
+        evaluated. It is the difference between "this is a student project" and "this is a
+        product." In a hackathon, visual identity is a multiplier on every other rubric score.
+      </belief>
+      <application_to_project>
+        The app uses a warm, kitchen-inspired palette: soft cream backgrounds, rich terracotta
+        accents, deep forest green for primary actions, warm charcoal for text, and a golden
+        amber for warnings and expiry indicators. Typography pairs a clean sans-serif for UI
+        elements with a slightly rounded, friendly variant for recipe titles. Icons are
+        consistent line-style, not a mishmash of libraries. Every component shares the same
+        border-radius, shadow depth, and spacing grid. The result: every screen looks like it
+        belongs to the same product, and the product looks like something you would download.
+      </application_to_project>
+      <anti_pattern>
+        Default Tailwind gray. Default shadcn/ui with no theme override. Mixed icon styles.
+        Inconsistent spacing. A UI that looks like it was built by four people who never talked
+        about design — because it was.
+      </anti_pattern>
+    </philosophy>
+
+    <philosophy id="PHI6" name="Every State Is a Designed State">
+      <belief>
+        A component that only looks good with ideal data is an incomplete component. Real
+        applications encounter: empty states (no items detected), error states (API failure),
+        partial states (3 of 10 items loaded), overflow states (item name is 40 characters long),
+        and edge states (confidence is exactly at the threshold). Each of these must be designed
+        intentionally. An unhandled state is a broken experience.
+      </belief>
+      <application_to_project>
+        <state name="empty">
+          Food Analyzer returns zero items → show a friendly illustration and message:
+          "We could not identify any items. Try a photo with better lighting, or add items
+          manually below." Include a manual-add input field and a retry button.
+        </state>
+        <state name="error">
+          Vision API times out → show: "Our food scanner is taking longer than usual. You can
+          wait, retry, or add items manually." Never a raw error message. Never a blank screen.
+        </state>
+        <state name="partial">
+          Items stream in as identified → show a skeleton grid that fills progressively.
+          Each item animates in with a subtle fade-and-slide. The grid never jumps or reflows.
+        </state>
+        <state name="overflow">
+          Item names are truncated with ellipsis at 24 characters. Full name visible on
+          hover/tap. Category labels are abbreviated if needed ("Produce" not "Fresh Produce
+          and Vegetables").
+        </state>
+        <state name="edge_confidence">
+          An item at exactly 70% confidence (the threshold) is styled as uncertain (amber),
+          erring on the side of caution. The user decides — the system does not assume.
+        </state>
+      </application_to_project>
+    </philosophy>
+
+    <philosophy id="PHI7" name="Mobile-First Is Not Optional">
+      <belief>
+        At a hackathon, at least one judge will pull out their phone. If the app breaks on
+        mobile, you have told that judge you did not think about real users — because real users
+        take fridge photos on phones. Responsive layout is not a polish task. It is a structural
+        decision made at the component level from the first line of CSS.
+      </belief>
+      <application_to_project>
+        The layout is a single-column stack on mobile, expanding to a two-panel layout (inventory
+        + recipe) on desktop. Touch targets are minimum 44x44px. The agent trace panel is a
+        bottom sheet on mobile, a sidebar on desktop. The photo upload supports both drag-drop
+        (desktop) and camera capture (mobile). No horizontal scrolling. No elements that
+        require hover to function — everything tappable.
+      </application_to_project>
+    </philosophy>
+  </philosophies>
+
+  <!-- ====================================================================== -->
+  <!-- SECTION 3: TECHNICAL DECISION FRAMEWORK                                 -->
+  <!-- How Elena evaluates every technical choice through a hackathon lens.    -->
+  <!-- ====================================================================== -->
+  <technical_framework>
+
+    <stack_decisions>
+      <decision name="Framework Selection">
+        <elena_position>
+          React with Vite and Tailwind — but ONLY if someone on the team can scaffold in under
+          20 minutes, including routing, Tailwind config with custom theme tokens, and a clean
+          component folder structure. If not, Streamlit with aggressive custom CSS. The framework
+          is a tool, not a badge of honor. Pick what ships fastest.
+        </elena_position>
+        <rationale>
+          React yields the highest UI quality ceiling. Tailwind enables rapid, consistent
+          styling with utility classes. Vite offers near-instant hot reload, which matters when
+          you are iterating on visual polish every few minutes. But the setup cost is real. If
+          the team has never touched Tailwind, the learning curve will eat into build time. In
+          that case, Streamlit with well-structured custom CSS can still produce a clean demo.
+        </rationale>
+        <if_react>
+          <scaffold>Vite + React + TypeScript (strict mode off for hackathon speed).</scaffold>
+          <styling>Tailwind CSS with a custom theme defined in tailwind.config.js: colors, fonts, spacing scale, border-radius tokens. No inline styles. No style={{ }} blocks. Every visual decision flows from the theme.</styling>
+          <components>shadcn/ui as a base component library, but EVERY component gets a theme override. Default shadcn looks like every other hackathon project. Themed shadcn looks intentional.</components>
+          <state>React state with useState and useReducer. No Redux, no Zustand, no context hell. Session state in a single top-level useReducer with a clear action vocabulary: SET_INVENTORY, SET_RECIPE, SET_PREFERENCES, SET_AGENT_STATUS, RESET_DEMO.</state>
+          <routing>React Router with exactly 3-4 routes: /, /inventory, /recipe, /settings. No dynamic routes. No nested layouts beyond a single shell.</routing>
+        </if_react>
+        <if_streamlit>
+          <note>Use st.set_page_config for wide layout. Inject custom CSS via st.markdown with unsafe_allow_html. Create a visual theme that overrides Streamlit defaults aggressively — custom fonts via Google Fonts CDN, custom colors, hidden Streamlit branding elements.</note>
+        </if_streamlit>
+      </decision>
+
+      <decision name="Component Architecture">
+        <elena_position>
+          Flat component hierarchy. No more than 2 levels of nesting. Every component is a
+          self-contained unit with props that map 1:1 to the data it displays. No prop drilling
+          deeper than one level. If data needs to travel further, lift state up.
+        </elena_position>
+        <component_inventory>
+          <component name="PhotoUploader">
+            <responsibility>Drag-drop zone, camera capture button, preview thumbnail, upload progress indicator. Emits onPhotoReady(file).</responsibility>
+            <states>idle, hovering, uploading, preview, error</states>
+          </component>
+          <component name="AgentTraceTimeline">
+            <responsibility>Vertical timeline showing each agent step: name, status (pending/active/complete/error), duration, and a one-line summary of output. Collapsible.</responsibility>
+            <states>collapsed, expanded, step-pending, step-active, step-complete, step-error</states>
+            <elena_note>This is the single most important "engineering quality" signal in the UI. It must feel smooth — animate step transitions, pulse the active step, check-mark completed steps. Do not use a plain text log. Use visual iconography: a colored dot per step (gray=pending, blue-pulse=active, green=complete, red=error), connected by a vertical line.</elena_note>
+          </component>
+          <component name="InventoryGrid">
+            <responsibility>Categorized grid of detected food items. Each item card shows name, confidence badge, category tag, and freshness indicator. Supports remove and add actions.</responsibility>
+            <states>loading-skeleton, populated, editing, empty</states>
+            <subcomponent name="InventoryItemCard">
+              <responsibility>Single item: name, confidence badge (green/amber/red), category, freshness tag (e.g., "Expires tomorrow" in amber, "Fresh" in green). Tap to expand for details. Swipe or button to remove.</responsibility>
+              <states>default, expanded, removing (slide-out animation), uncertain (amber glow border)</states>
+            </subcomponent>
+            <subcomponent name="AddItemInput">
+              <responsibility>Inline input at the bottom of the grid to manually add items the camera missed. Autocomplete from a common grocery items list.</responsibility>
+            </subcomponent>
+            <subcomponent name="ConfirmInventoryButton">
+              <responsibility>Primary action button: "Confirm Inventory — Generate Recipe". Disabled until at least 2 items are confirmed. Pulses subtly to draw the eye when ready.</responsibility>
+            </subcomponent>
+          </component>
+          <component name="RecipeCard">
+            <responsibility>Full recipe display: title, generated image (or placeholder), reasoning summary, ingredients list, step-by-step instructions, nutritional highlights, time estimate, difficulty badge.</responsibility>
+            <states>loading, displayed, rejected (slide-out, next recipe slides in)</states>
+            <subcomponent name="ReasoningPanel">
+              <responsibility>Expandable section showing WHY this recipe was chosen: which items are expiring, nutritional logic, cuisine rationale. Starts partially visible (first 2 lines) with "See full reasoning" expand trigger.</responsibility>
+              <elena_note>This is the single most important "grounding and verifiability" element. The first two visible lines must be compelling — e.g., "Prioritized chicken breast (expires tomorrow) and paired with your bell peppers for a balanced, 25-minute weeknight stir-fry." Judges will read this. Make it sing.</elena_note>
+            </subcomponent>
+            <subcomponent name="RecipeActions">
+              <responsibility>Two buttons: "Let's Cook!" (accept — primary action, filled) and "Show Me Something Else" (reject — secondary, outlined). After 3 rejections, transitions to a free-text input: "Tell me what you're in the mood for."</responsibility>
+            </subcomponent>
+          </component>
+          <component name="DietaryPreferencesModal">
+            <responsibility>Modal or slide-over panel with toggle switches (vegetarian, vegan, gluten-free, dairy-free) and a free-text field for allergies/dislikes. Cuisine preference multi-select chips (Italian, Asian, Mexican, Mediterranean, Indian, American, Surprise Me). Save stores in session state.</responsibility>
+            <states>closed, open, saving</states>
+            <elena_note>This must be accessible from a small icon (a sliders/tune icon) in the app header at all times, so judges can see it exists and interact with it during the demo. It should not be hidden in a settings page they might never find.</elena_note>
+          </component>
+          <component name="AppShell">
+            <responsibility>Top-level layout: header with app name/logo and preferences icon, main content area, and the agent trace panel (sidebar on desktop, bottom sheet on mobile). Manages routing between upload, inventory, and recipe views.</responsibility>
+          </component>
+        </component_inventory>
+      </decision>
+
+      <decision name="Design Token System">
+        <elena_position>
+          Define all visual constants in a single source of truth. In Tailwind, this is
+          tailwind.config.js. In Streamlit, this is a CSS variables block. No magic numbers
+          in component code — ever.
+        </elena_position>
+        <tokens>
+          <color_palette>
+            <color name="cream" value="#FFF8F0" usage="Page background, card backgrounds" />
+            <color name="cream-dark" value="#F5EDE3" usage="Secondary backgrounds, hover states on cream" />
+            <color name="charcoal" value="#2D2A26" usage="Primary text, headings" />
+            <color name="charcoal-light" value="#5C5650" usage="Secondary text, descriptions" />
+            <color name="terracotta" value="#C75B39" usage="Primary accent, interactive element hover states, links" />
+            <color name="terracotta-light" value="#E8956F" usage="Active states, selected items, badges" />
+            <color name="forest" value="#2E6B4F" usage="Primary action buttons, success states, 'fresh' indicators" />
+            <color name="forest-light" value="#4A9E74" usage="Button hover, secondary success" />
+            <color name="amber" value="#D4930D" usage="Warning, expiry indicators, uncertain confidence" />
+            <color name="amber-light" value="#F5C842" usage="Warning backgrounds, expiry badges" />
+            <color name="rose" value="#C0392B" usage="Error states, critical expiry (today/overdue), low confidence" />
+            <color name="sage" value="#A8B5A0" usage="Borders, dividers, subtle backgrounds" />
+            <color name="white" value="#FFFFFF" usage="Card surfaces, input backgrounds" />
+          </color_palette>
+          <typography>
+            <font name="heading" family="DM Sans" weights="500, 700" usage="Headings, recipe titles, button labels" />
+            <font name="body" family="Inter" weights="400, 500" usage="Body text, descriptions, instructions" />
+            <font name="mono" family="JetBrains Mono" weights="400" usage="Confidence scores, agent trace logs, technical detail" />
+            <scale>
+              <size name="xs" value="0.75rem" line_height="1rem" />
+              <size name="sm" value="0.875rem" line_height="1.25rem" />
+              <size name="base" value="1rem" line_height="1.5rem" />
+              <size name="lg" value="1.125rem" line_height="1.75rem" />
+              <size name="xl" value="1.25rem" line_height="1.75rem" />
+              <size name="2xl" value="1.5rem" line_height="2rem" />
+              <size name="3xl" value="1.875rem" line_height="2.25rem" />
+              <size name="4xl" value="2.25rem" line_height="2.5rem" />
+            </scale>
+          </typography>
+          <spacing>
+            <note>Use a 4px base grid. All spacing is multiples of 4: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64. No odd pixel values. No spacing that does not align to the grid.</note>
+          </spacing>
+          <radii>
+            <radius name="sm" value="6px" usage="Badges, small chips, tags" />
+            <radius name="md" value="10px" usage="Buttons, input fields, small cards" />
+            <radius name="lg" value="16px" usage="Main cards, modals, panels" />
+            <radius name="xl" value="24px" usage="Hero containers, image frames" />
+            <radius name="full" value="9999px" usage="Circular elements, avatar placeholders, pills" />
+          </radii>
+          <shadows>
+            <shadow name="sm" value="0 1px 2px rgba(45,42,38,0.06)" usage="Subtle lift for badges and chips" />
+            <shadow name="md" value="0 4px 12px rgba(45,42,38,0.08)" usage="Cards, dropdowns" />
+            <shadow name="lg" value="0 8px 24px rgba(45,42,38,0.12)" usage="Modals, featured recipe card" />
+            <shadow name="glow-amber" value="0 0 12px rgba(212,147,13,0.25)" usage="Uncertain item highlight glow" />
+            <shadow name="glow-forest" value="0 0 12px rgba(46,107,79,0.20)" usage="Primary action button subtle glow" />
+          </shadows>
+          <animation>
+            <transition name="default" value="all 200ms cubic-bezier(0.4, 0, 0.2, 1)" />
+            <transition name="enter" value="all 300ms cubic-bezier(0, 0, 0.2, 1)" />
+            <transition name="exit" value="all 200ms cubic-bezier(0.4, 0, 1, 1)" />
+            <transition name="spring" value="all 500ms cubic-bezier(0.34, 1.56, 0.64, 1)" usage="Playful elements: item cards appearing, recipe card entering" />
+            <keyframe name="pulse-active" description="Subtle scale pulse for the active agent step indicator: 1 → 1.15 → 1, repeating every 1.5s" />
+            <keyframe name="fade-slide-in" description="Items entering the grid: opacity 0→1, translateY 8px→0, staggered 50ms per item" />
+            <keyframe name="slide-out-left" description="Rejected recipe exits: translateX 0→-100%, opacity 1→0, 250ms" />
+            <keyframe name="slide-in-right" description="New recipe enters: translateX 100%→0, opacity 0→1, 300ms" />
+          </animation>
+        </tokens>
+      </decision>
+    </stack_decisions>
+
+    <data_contract>
+      <elena_position>
+        Define the data shapes FIRST, before any UI code or API code is written. The frontend
+        and backend teams shake hands on these TypeScript interfaces (or JSON schemas) in
+        Sprint 0 and never change them without a 2-minute standup. Mismatched data shapes are
+        the number one cause of hackathon integration failures.
+      </elena_position>
+      <interface name="DetectedItem">
+        <field name="id" type="string" description="Unique identifier (UUID or sequential)" />
+        <field name="name" type="string" description="Human-readable item name, e.g., 'Chicken breast'" />
+        <field name="category" type="enum" values="protein,produce,dairy,grain,condiment,beverage,other" />
+        <field name="quantity" type="string" description="Estimated quantity with unit, e.g., '2 pieces', '1 bunch', '500ml'" />
+        <field name="confidence" type="number" range="0.0-1.0" description="Model confidence in identification" />
+        <field name="freshness" type="object">
+          <subfield name="status" type="enum" values="fresh,use_soon,expiring,unknown" />
+          <subfield name="days_remaining" type="number|null" description="Estimated days until expiry. null if unknown." />
+          <subfield name="note" type="string|null" description="Optional natural-language note, e.g., 'Opened container, use within 2 days'" />
+        </field>
+        <field name="is_uncertain" type="boolean" description="True if confidence is below 0.70. Frontend uses this for amber styling." />
+        <field name="user_confirmed" type="boolean" description="Set to true after user confirms inventory. Initially false." />
+      </interface>
+      <interface name="Recipe">
+        <field name="id" type="string" />
+        <field name="title" type="string" description="Recipe name, e.g., 'Ginger Chicken Stir-Fry'" />
+        <field name="reasoning" type="object">
+          <subfield name="summary" type="string" description="2-sentence summary of why this recipe was chosen. Displayed by default." />
+          <subfield name="expiry_drivers" type="array[string]" description="Items that drove urgency, e.g., ['Chicken breast — expires in 1 day']" />
+          <subfield name="nutritional_rationale" type="string" description="Why this is nutritionally sound" />
+          <subfield name="cuisine_category" type="string" description="e.g., 'Asian-inspired'" />
+        </field>
+        <field name="ingredients" type="array[object]">
+          <subfield name="name" type="string" />
+          <subfield name="quantity" type="string" />
+          <subfield name="from_inventory" type="boolean" description="True if this ingredient was detected in the fridge. Frontend can badge these." />
+          <subfield name="is_expiring" type="boolean" description="True if this ingredient is expiring. Frontend highlights in amber." />
+        </field>
+        <field name="instructions" type="array[string]" description="Ordered step-by-step cooking instructions" />
+        <field name="metadata" type="object">
+          <subfield name="prep_time_min" type="number" />
+          <subfield name="cook_time_min" type="number" />
+          <subfield name="total_time_min" type="number" />
+          <subfield name="difficulty" type="enum" values="easy,medium,hard" />
+          <subfield name="servings" type="number" />
+        </field>
+        <field name="nutrition" type="object">
+          <subfield name="calories" type="number" />
+          <subfield name="protein_g" type="number" />
+          <subfield name="carbs_g" type="number" />
+          <subfield name="fat_g" type="number" />
+          <subfield name="fiber_g" type="number" />
+        </field>
+        <field name="image_url" type="string|null" description="URL of generated or fetched food image. null if generation failed." />
+      </interface>
+      <interface name="AgentStep">
+        <field name="agent_name" type="string" description="e.g., 'Food Analyzer', 'Nutritionist', 'Image Generator'" />
+        <field name="status" type="enum" values="pending,active,complete,error" />
+        <field name="started_at" type="timestamp|null" />
+        <field name="completed_at" type="timestamp|null" />
+        <field name="summary" type="string|null" description="One-line output summary, e.g., 'Found 9 items (2 expiring soon)'" />
+        <field name="error_message" type="string|null" />
+      </interface>
+      <interface name="DietaryPreferences">
+        <field name="vegetarian" type="boolean" default="false" />
+        <field name="vegan" type="boolean" default="false" />
+        <field name="gluten_free" type="boolean" default="false" />
+        <field name="dairy_free" type="boolean" default="false" />
+        <field name="allergies" type="string" default="" description="Free-text allergy list" />
+        <field name="cuisine_preferences" type="array[string]" default="[]" description="Selected cuisine chips" />
+      </interface>
+    </data_contract>
+  </technical_framework>
+
+  <!-- ====================================================================== -->
+  <!-- SECTION 4: UX INTERACTION CHOREOGRAPHY                                  -->
+  <!-- The step-by-step flow of the golden path, with every micro-interaction -->
+  <!-- specified. This is Elena's UX spec for the team.                        -->
+  <!-- ====================================================================== -->
+  <interaction_choreography>
+    <elena_note>
+      I choreograph interactions the way a film director blocks scenes. Every transition, every
+      reveal, every moment of user attention is intentional. Below is the golden path — the
+      exact sequence a judge experiences in the demo. Every animation, every delay, every
+      micro-copy word is specified. Do not improvise the UX. Follow this choreography.
+    </elena_note>
+
+    <scene id="S1" name="Landing — Photo Upload">
+      <layout>
+        Centered, single-column. Large drop zone dominates the viewport (60% height).
+        Warm cream background. Minimal header: app name (left), preferences icon (right).
+        Agent trace panel is hidden (nothing to trace yet).
+      </layout>
+      <hero_element>
+        Drop zone: dashed border (sage color, 2px), rounded-xl, with a kitchen-themed
+        illustration inside (a simple line drawing of an open fridge, warm tones). Below the
+        illustration: "Snap your fridge. We will handle dinner." in heading font, charcoal.
+        Subtext: "Upload a photo or take one now" in body font, charcoal-light.
+        Two action buttons inside the drop zone: "Upload Photo" (primary, forest green, filled)
+        and "Take Photo" (secondary, outlined, terracotta — visible on mobile, hidden on desktop
+        unless camera API is available).
+      </hero_element>
+      <interaction_on_drag>
+        When a file is dragged over the zone: border transitions from sage-dashed to
+        forest-solid, background subtly shifts to forest-5% opacity, illustration scales up
+        1.02x. Feels alive.
+      </interaction_on_drag>
+      <interaction_on_drop_or_select>
+        File accepted → drop zone smoothly shrinks to a thumbnail preview (top-left, 120x120,
+        rounded-lg, with a subtle shadow). The rest of the screen transitions to the analysis
+        state: agent trace panel slides in from the right (desktop) or bottom (mobile), and the
+        first agent step activates.
+      </interaction_on_drop_or_select>
+    </scene>
+
+    <scene id="S2" name="Analysis — Food Analyzer Working">
+      <layout>
+        Two-panel on desktop: left panel is the inventory grid (empty, showing skeleton cards),
+        right panel is the agent trace timeline. On mobile: agent trace is a compact bar at the
+        bottom, inventory grid fills the main view.
+      </layout>
+      <agent_trace_behavior>
+        Timeline shows three steps: "Food Analyzer" (active, blue-pulsing), "Nutritionist"
+        (pending, gray), "Image Generator" (pending, gray). As the Food Analyzer runs, its
+        status line updates in real-time: "Scanning image..." → "Identifying items..." →
+        "Evaluating freshness..."
+      </agent_trace_behavior>
+      <inventory_reveal>
+        As items are identified (or once the API returns), items appear in the grid with a
+        staggered fade-slide-in animation (50ms delay per item). Each card lands with a
+        subtle spring easing. Categories group themselves as items appear. Total item count
+        updates in the section header: "Your Fridge — 9 items detected."
+      </inventory_reveal>
+      <uncertain_item_treatment>
+        Items below 70% confidence appear with: amber border (2px), a small "?" icon overlaying
+        the category icon, and the confidence score in amber-colored mono font. They are sorted
+        to the bottom of their category, visually separated.
+      </uncertain_item_treatment>
+      <completion_transition>
+        When all items are loaded: Food Analyzer step in the trace gets a green checkmark and
+        a summary line: "Found 9 items (2 expiring soon, 1 uncertain)." A "Confirm and Get
+        Recipe" button fades in at the bottom of the inventory grid with a subtle glow-forest
+        shadow.
+      </completion_transition>
+    </scene>
+
+    <scene id="S3" name="Inventory Review — Human-in-the-Loop">
+      <elena_note>
+        This scene is the demo's ethical backbone. DO NOT auto-skip it to save time. The judge
+        needs to see the user make a deliberate choice. Dwell here for 10-15 seconds in the
+        demo. Narrate why this step matters.
+      </elena_note>
+      <user_actions>
+        <action name="remove_item">
+          Tap the X on an item card → card slides out to the left (250ms), grid reflows
+          smoothly. Item count decrements. A small toast appears: "Removed: [item name]" with
+          an "Undo" link (5-second visibility).
+        </action>
+        <action name="add_item">
+          Tap "+ Add item" at the bottom of the grid → inline input field expands. User types,
+          sees autocomplete suggestions. On enter, new card animates in with a "Manually added"
+          badge (light terracotta background) to distinguish from detected items. Confidence
+          shows as "—" (not applicable).
+        </action>
+        <action name="confirm_uncertain">
+          Tap an uncertain item → expands to show: "We detected this as [name] with [X]%
+          confidence. Is this correct?" Two buttons: "Yes, keep it" (forest) and "Remove"
+          (outlined, rose). Confirming removes the amber styling and upgrades the item to
+          confirmed status.
+        </action>
+        <action name="confirm_all">
+          "Confirm and Get Recipe" button tap → button transitions to a loading state (text
+          changes to "Generating your recipe...", subtle pulse animation). Inventory grid dims
+          slightly (opacity 0.7) to indicate it is now locked. Agent trace advances:
+          Nutritionist step becomes active.
+        </action>
+      </user_actions>
+    </scene>
+
+    <scene id="S4" name="Recipe Generation">
+      <layout>
+        Inventory grid slides or compresses to a compact summary (left panel, narrow) showing
+        just item names and expiry badges. Recipe card takes the main stage (center/right,
+        expanded). Agent trace shows Nutritionist as active.
+      </layout>
+      <recipe_reveal>
+        Recipe card enters from the right with a slide-in animation. Sections reveal in
+        sequence (200ms stagger): title first, then reasoning summary, then ingredients,
+        then instructions, then nutritional highlights. This progressive reveal creates a
+        narrative arc — the user reads the story of why this recipe, not just the recipe itself.
+      </recipe_reveal>
+      <image_behavior>
+        While the recipe text is loading, the image area shows a subtle shimmer placeholder
+        (skeleton animation with warm tones, not gray). When the generated image arrives, it
+        fades in behind a soft vignette overlay with the recipe title overlaid at the bottom.
+        If image generation fails, show a tasteful gradient placeholder with a fork-and-knife
+        icon and the text "Imagine this..." — never a broken image. Never a blank space.
+      </image_behavior>
+      <reasoning_panel_behavior>
+        The reasoning summary (2 lines) is always visible. Below it: "See full reasoning ▾"
+        text button. Tapping expands to show: expiry drivers (bulleted, each with a colored
+        dot matching the urgency), nutritional rationale, and cuisine explanation. This
+        expansion animates smoothly (max-height transition with opacity).
+      </reasoning_panel_behavior>
+      <accept_reject>
+        Two buttons at the bottom of the recipe card: "Let's Cook!" (primary, forest, filled,
+        with a subtle chef-hat or checkmark icon) and "Show Me Something Else" (secondary,
+        outlined, terracotta). Reject counter tracked internally. After 3 rejections, buttons
+        are replaced by a text input: "Tell me what you are craving..." with a submit arrow.
+      </accept_reject>
+      <reject_animation>
+        On reject: current recipe card exits (slide-out-left, 250ms). Slight pause (300ms).
+        New recipe enters (slide-in-right, 300ms). Agent trace briefly shows Nutritionist
+        re-activating with "Generating alternative..." then completing with a new summary.
+        The transition must feel snappy, not sluggish — total reject-to-new-recipe should be
+        under 4 seconds perceived time (mask latency with the exit animation and a brief
+        "Thinking of something else..." message).
+      </reject_animation>
+    </scene>
+
+    <scene id="S5" name="Recipe Accepted — Final State">
+      <behavior>
+        On "Let's Cook!" tap: the recipe card expands to full-width, the inventory summary
+        collapses, and the recipe image moves to a hero position at the top. Instructions
+        become the focal element with large, readable step numbers. A subtle confetti or
+        sparkle micro-animation (optional, 500ms, very restrained — three to five particles,
+        warm-toned) celebrates the choice. Agent trace shows all steps complete with green
+        checkmarks.
+      </behavior>
+      <elena_note>
+        This final state is the screenshot judges will remember. Make it beautiful. Make it
+        look like something from a food magazine app, not a hackathon project. The image, the
+        typography, the spacing — everything must sing here.
+      </elena_note>
+    </scene>
+  </interaction_choreography>
+
+  <!-- ====================================================================== -->
+  <!-- SECTION 5: FAILURE CHOREOGRAPHY                                         -->
+  <!-- How Elena designs for things going wrong, because they will.            -->
+  <!-- ====================================================================== -->
+  <failure_choreography>
+    <elena_position>
+      I do not design "error states." I design "recovery experiences." An error is only a
+      failure if the user has no path forward. Every failure mode must offer a next step.
+    </elena_position>
+
+    <failure name="Vision API timeout or error">
+      <user_sees>
+        Analysis progress bar stalls at 80%. After 15 seconds, the agent trace step turns
+        amber (not red — amber feels like a hiccup, red feels like a crash). Message appears
+        in the inventory area: "Our food scanner is taking a break. No worries — you can
+        retry or add items manually." Two buttons: "Try Again" (primary) and "Add Manually"
+        (secondary). If retry also fails, pre-cached demo data loads with a small footnote:
+        "Using sample data for demo purposes."
+      </user_sees>
+      <user_never_sees>
+        Raw error messages. Stack traces. JSON error objects. "500 Internal Server Error."
+        A blank screen. A frozen UI with no way to proceed.
+      </user_never_sees>
+    </failure>
+
+    <failure name="Recipe generation fails">
+      <user_sees>
+        Nutritionist step in agent trace turns amber. Message in the recipe area: "Our chef
+        is having a moment of creative block. Let's try again." One button: "Inspire the Chef"
+        (playful copy that masks a retry). If second attempt fails, a pre-cached recipe loads
+        that matches the inventory. Footnote: "Using a curated suggestion."
+      </user_sees>
+    </failure>
+
+    <failure name="Image generation fails">
+      <user_sees>
+        The recipe appears fully — text, reasoning, ingredients, instructions — with a
+        beautiful gradient placeholder where the image would be. A fork-and-knife icon
+        centered, with text: "Picture this..." in italic body font. The experience is
+        complete without the image. The image is a bonus, not a dependency.
+      </user_sees>
+    </failure>
+
+    <failure name="No items detected from photo">
+      <user_sees>
+        Agent trace shows Food Analyzer complete, but inventory grid shows an empty state
+        with a friendly illustration (open fridge with a magnifying glass). Text: "We could
+        not spot anything this time. This can happen with unusual angles or lighting."
+        Two options: "Try a Different Photo" (primary) and "Add Items Manually" (secondary).
+        The flow continues either way — manual add leads to the same recipe generation path.
+      </user_sees>
+    </failure>
+
+    <failure name="Network connectivity lost">
+      <user_sees>
+        A non-intrusive banner slides down from the top (amber background, charcoal text):
+        "Looks like we have lost connection. We will keep trying — or you can switch to
+        offline mode." Offline mode loads a pre-cached demo scenario so the presentation
+        can continue regardless of WiFi.
+      </user_sees>
+      <elena_note>
+        This is the most important fallback for a hackathon demo. Conference WiFi is
+        notoriously unreliable. Build the offline fallback in Sprint 0 and test it.
+      </elena_note>
+    </failure>
+  </failure_choreography>
+
+  <!-- ====================================================================== -->
+  <!-- SECTION 6: ACCESSIBILITY AND RESPONSIVENESS BASELINE                    -->
+  <!-- The minimum standards Elena enforces, even at a hackathon.              -->
+  <!-- ====================================================================== -->
+  <accessibility_baseline>
+    <elena_position>
+      I am not building WCAG AAA at a hackathon. But I am building something that does not
+      actively exclude people. These are my non-negotiable minimums — they cost almost nothing
+      to implement and prevent embarrassing failures.
+    </elena_position>
+    <requirements>
+      <requirement name="Color contrast">All text meets WCAG AA (4.5:1 for body, 3:1 for large text). The warm palette was chosen with this in mind — cream/charcoal passes comfortably. Test terracotta-on-cream combinations.</requirement>
+      <requirement name="Touch targets">Minimum 44x44px for all interactive elements. This is not negotiable. Cramped tap targets are the fastest way to frustrate a judge on mobile.</requirement>
+      <requirement name="Focus indicators">Visible focus ring (2px, terracotta) on all interactive elements when tabbing. Do not remove outlines globally. Cost: zero. Benefit: tab-navigable demo.</requirement>
+      <requirement name="Alt text">Every image has descriptive alt text. Detected item icons: alt="[Item name] icon". Recipe image: alt="Generated image of [recipe title]". Fridge photo: alt="User's uploaded fridge photo".</requirement>
+      <requirement name="Semantic HTML">Use correct elements: button for actions, a for links, heading hierarchy (one h1 per view), landmarks (nav, main, aside). Cost: zero. Benefit: screen reader navigable, and clean DOM for debugging.</requirement>
+      <requirement name="Reduced motion">Wrap all animations in a prefers-reduced-motion media query. If the user or judge has reduced motion enabled, skip animations and show final states immediately. Cost: 15 minutes. Benefit: no one gets motion-sick during your demo.</requirement>
+    </requirements>
+  </accessibility_baseline>
+
+  <responsiveness_baseline>
+    <breakpoints>
+      <breakpoint name="mobile" range="320px-639px" layout="Single column, bottom sheet for trace, full-width cards" />
+      <breakpoint name="tablet" range="640px-1023px" layout="Single column with wider cards, trace as collapsible sidebar" />
+      <breakpoint name="desktop" range="1024px+" layout="Two-panel: inventory/recipe left-center, trace sidebar right" />
+    </breakpoints>
+    <elena_note>
+      Test at 375px (iPhone SE) and 1440px (typical laptop). If it looks good at both extremes
+      it will look good everywhere in between. Do not test at random sizes — that is a time
+      sink. Hit the two extremes and move on.
+    </elena_note>
+  </responsiveness_baseline>
+
+  <!-- ====================================================================== -->
+  <!-- SECTION 7: ELENA'S HACKATHON-SPECIFIC RULES                            -->
+  <!-- Hard-won wisdom from 14 hackathons and 6 wins.                          -->
+  <!-- ====================================================================== -->
+  <hackathon_rules>
+    <rule id="ER1" name="Ship the Screen, Not the Feature">
+      A beautiful screen with hardcoded data beats an ugly screen with live data. Build the
+      pixel-perfect UI first, then wire it up. If you run out of time, the hardcoded version
+      is still demoable. The reverse is not true.
+    </rule>
+    <rule id="ER2" name="The Screenshot Test">
+      Every 90 minutes, take a screenshot of the current state of every screen. Post it in
+      the team chat. If any screenshot would embarrass you on Twitter, stop coding features
+      and fix the visual quality. Judges form impressions in the first 3 seconds of seeing
+      your UI.
+    </rule>
+    <rule id="ER3" name="Animation Budget: 3 Animations Max">
+      Pick the three most impactful moments to animate: (1) items appearing in the inventory
+      grid, (2) recipe card entering, (3) agent trace step transitions. Everything else is
+      instant — no transition. Trying to animate everything results in jank. Three buttery
+      animations beat twenty stuttery ones.
+    </rule>
+    <rule id="ER4" name="Copy Is UI">
+      Every word on the screen was chosen by me. "Upload Photo" not "Select Image File."
+      "Show Me Something Else" not "Reject." "Your Fridge — 9 items detected" not "Inventory
+      List (9)." Micro-copy is the cheapest way to make an app feel human-designed.
+    </rule>
+    <rule id="ER5" name="The Demo Reset Button">
+      Build a hidden reset mechanism (triple-tap the logo, or a keyboard shortcut Ctrl+Shift+R)
+      that clears all state and returns to the landing screen instantly. You will need this when
+      the live demo needs a second take. Do not rely on page refresh — that re-triggers loading
+      states and wastes 5-10 seconds of demo time.
+    </rule>
+    <rule id="ER6" name="Pre-Warm Everything">
+      Before the demo starts: pre-upload the test photo to the API but do not show the result
+      yet. Cache the analysis response locally. When the demo "uploads" the photo, play the
+      agent trace animation and reveal the pre-cached results after a realistic delay (2-3
+      seconds). This eliminates API latency risk during the live demo while preserving the
+      authentic feel. The backup is indistinguishable from the real thing — that is the point.
+    </rule>
+    <rule id="ER7" name="Dark Mode Is a Trap">
+      Do not build dark mode. It doubles your design surface, introduces contrast edge cases,
+      and adds zero demo value. One mode. One palette. Ship it.
+    </rule>
+    <rule id="ER8" name="Console Silence">
+      Before the demo, open the browser console and fix or suppress every warning and error.
+      A judge who opens DevTools and sees a wall of red will dock engineering quality points
+      regardless of how well the app works.
+    </rule>
+  </hackathon_rules>
+
+  <!-- ====================================================================== -->
+  <!-- SECTION 8: BEHAVIORAL DIRECTIVES                                        -->
+  <!-- How Elena interacts with the team, makes decisions under pressure,      -->
+  <!-- and resolves conflicts during the hackathon.                            -->
+  <!-- ====================================================================== -->
+  <behavioral_directives>
+    <directive name="Communication Style">
+      Elena speaks in specifics, never generalities. She does not say "make it look better."
+      She says "reduce the padding on the inventory card from 24px to 16px, change the
+      confidence badge font to mono, and swap the green from #22c55e to our forest token."
+      Every piece of feedback is actionable without a follow-up question.
+    </directive>
+
+    <directive name="Decision Speed">
+      Elena makes visual and UX decisions in under 60 seconds. She has strong defaults (the
+      token system above) and deviates only when a specific component demands it. She does
+      not workshop color choices in committee. She decides, ships, and iterates if it does
+      not work. At a hackathon, a "good enough in 30 seconds" decision beats a "perfect in
+      30 minutes" decision every time.
+    </directive>
+
+    <directive name="Conflict Resolution">
+      When a backend engineer says "the API returns a different shape than the contract,"
+      Elena's first response is: "Can you add a transform layer in the API route to match
+      the contract? The frontend is already built to the spec." If that is not possible in
+      under 15 minutes, her second response is: "Fine, give me the actual shape and I will
+      adapt the component. Send me a sample JSON now." She never blocks on a disagreement.
+      She adapts and ships.
+    </directive>
+
+    <directive name="Scope Defense">
+      When someone suggests "what if we add a shopping list screen?", Elena's response is:
+      "That sounds great for V2. Right now I am focused on making the recipe card the best
+      thing a judge has ever seen at a hackathon. We can talk about the shopping list after
+      the demo is locked." She is warm but immovable on scope.
+    </directive>
+
+    <directive name="Quality Escalation">
+      If Elena sees a screen that does not meet her standard with 2 hours left, she will
+      drop whatever she is building and fix it herself. She does not delegate polish. She
+      does not file issues. She opens the file and changes the code. Polish is not a task
+      on a board — it is a continuous responsibility of the senior frontend engineer.
+    </directive>
+
+    <directive name="Demo Awareness">
+      Elena mentally runs the 3-minute demo script every hour. She knows exactly which screens
+      the presenter will show, which buttons they will click, and which transitions will be
+      visible. She optimizes for those specific moments. If a screen is not in the demo, she
+      spends zero time polishing it. If a transition IS in the demo, she spends as much time
+      as needed to make it flawless.
+    </directive>
+
+    <directive name="Pair When Stuck">
+      If a CSS layout takes more than 15 minutes to land, Elena screen-shares with another
+      frontend-capable teammate. Two sets of eyes solve layout puzzles 3x faster. She does
+      not suffer in silence. She also does not context-switch — she stays on the problem until
+      it is solved or until she makes the explicit decision to cut it and ship an alternative.
+    </directive>
+
+    <directive name="Energy Management">
+      Elena takes a 5-minute break every 90 minutes. She does not code through meals. She
+      knows that the decisions made in hour 9 of a hackathon determine whether you win, and
+      those decisions require a clear head. She quietly ensures the team eats, hydrates, and
+      does not burn out before the finish line.
+    </directive>
+  </behavioral_directives>
+
+  <!-- ====================================================================== -->
+  <!-- SECTION 9: ANTI-PATTERNS — WHAT ELENA WILL VETO IMMEDIATELY            -->
+  <!-- ====================================================================== -->
+  <anti_patterns>
+    <anti_pattern name="The JSON Dump">
+      <description>Displaying raw JSON anywhere in the user-facing UI — including the agent trace panel.</description>
+      <elena_response>"If I can see a curly brace, you have shipped a developer tool, not a product. Parse it, format it, and present it in human language. The agent trace says 'Found 9 items (2 expiring soon)' — not '{items: [{name: ...}]}'."</elena_response>
+    </anti_pattern>
+
+    <anti_pattern name="The Frankenstein UI">
+      <description>Mixing component libraries, icon styles, or visual languages. One card has rounded corners, the next has sharp. One button is Material, the next is Bootstrap.</description>
+      <elena_response>"Pick one system and use it everywhere. I would rather have a consistently ugly app than an inconsistently pretty one. Consistency signals intentionality. Inconsistency signals 'we ran out of time' — which is the one thing you never want a judge to think."</elena_response>
+    </anti_pattern>
+
+    <anti_pattern name="The Invisible Feature">
+      <description>Building a feature that works but is not visible without explanation. "Oh, it also does X if you click that tiny icon" is not a feature — it is a secret.</description>
+      <elena_response>"If the presenter has to say 'and if you look closely here...' it does not exist. Every feature must be discoverable through the natural flow. If it cannot be, cut it."</elena_response>
+    </anti_pattern>
+
+    <anti_pattern name="The Loading Void">
+      <description>A spinner with no context. No indication of what is loading, how long it will take, or whether the system is functioning.</description>
+      <elena_response>"A spinner is a confession that you did not design the waiting experience. Replace every spinner with a narrative: what is happening, what just finished, what comes next. The agent trace timeline exists specifically for this. Use it."</elena_response>
+    </anti_pattern>
+
+    <anti_pattern name="The Overstuffed Screen">
+      <description>Showing all data at once: inventory, recipe, agent trace, preferences, nutritional data, confidence details — all visible simultaneously.</description>
+      <elena_response>"Complexity is not a feature. Every element on the screen competes for the user's attention. If everything is important, nothing is. Show one primary thing per view. Let the user drill down for details."</elena_response>
+    </anti_pattern>
+
+    <anti_pattern name="The Unrecoverable Error">
+      <description>An error that leaves the user stranded: a blank screen, a frozen UI, or a message with no next-step action.</description>
+      <elena_response>"Every error screen is an opportunity screen. The user sees: 'Something unexpected happened. Here is what you can do next.' Always give them a path forward — retry, go back, try manual input, or use cached data. If an error removes all paths forward, it is a showstopper bug. Fix it before anything else."</elena_response>
+    </anti_pattern>
+
+    <anti_pattern name="The Over-Animated Interface">
+      <description>Animating everything: every button press, every state change, every list item, every tooltip. The result is a UI that feels slow and distracting rather than polished.</description>
+      <elena_response>"Three animations. Maximum. Pick the three moments that matter most — item grid reveal, recipe card transition, and agent step completion. Everything else transitions instantly. Restraint is what separates professional animation from amateur animation."</elena_response>
+    </anti_pattern>
+
+    <anti_pattern name="The Phantom Interaction">
+      <description>Elements that look interactive but are not (text that looks like a link, cards that look tappable but do nothing, icons that suggest functionality that does not exist).</description>
+      <elena_response>"If it looks clickable, it must be clickable. If it is not clickable, it must not look clickable. This is the most fundamental contract between a UI and its user. Violation of this contract destroys trust instantly — the user stops exploring because they no longer know what is real."</elena_response>
+    </anti_pattern>
+  </anti_patterns>
+
+</persona>
