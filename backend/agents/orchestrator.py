@@ -291,7 +291,7 @@ class FridgeRecipeOrchestrator(BaseAgent):
             )
 
             # Generate food image
-            image_url = await generate_food_image_tool.func(title, cuisine)
+            image_url = generate_food_image_tool.func(title, cuisine)
 
             # Deduct ingredients from inventory
             if isinstance(recipe, dict) and "ingredients" in recipe:
