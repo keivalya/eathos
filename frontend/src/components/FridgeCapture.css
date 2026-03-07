@@ -1,0 +1,124 @@
+/* FridgeCapture — Eathos onboarding photo capture */
+
+.capture-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+}
+
+.capture-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.capture-step-label {
+  font-size: var(--text-xs);
+  color: var(--color-primary);
+  font-weight: var(--weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.capture-body {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: var(--space-10) var(--space-6);
+}
+
+.capture-content {
+  width: 100%;
+  max-width: 560px;
+  animation: fade-in 0.3s ease;
+}
+
+.capture-content h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-light);
+  font-style: italic;
+  color: var(--color-ink);
+  margin-bottom: var(--space-2);
+}
+
+.capture-hint {
+  font-size: var(--text-sm);
+  color: var(--color-ink-mid);
+  margin-bottom: var(--space-6);
+  line-height: var(--leading-relaxed);
+}
+
+.capture-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.capture-thumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.capture-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb-remove {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(42, 37, 32, 0.7);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.capture-add {
+  aspect-ratio: 1;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  color: var(--color-ink-light);
+  font-size: var(--text-xs);
+  background: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.capture-add:hover {
+  border-color: var(--color-primary-light);
+  color: var(--color-primary);
+  background: var(--color-primary-wash);
+}
+
+.capture-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+}
+
+.capture-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-border);
+}

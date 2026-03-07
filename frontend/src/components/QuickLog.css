@@ -1,0 +1,75 @@
+/* QuickLog */
+
+.quick-log {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  animation: fade-in 0.3s ease;
+}
+
+.quick-log h3 {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-1);
+}
+
+.quick-log-hint {
+  font-size: var(--text-sm);
+  color: var(--color-ink-mid);
+  margin-bottom: var(--space-4);
+}
+
+.quick-log-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.quick-log-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.quick-log-input {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  background: var(--color-bg-warm);
+}
+
+.quick-log-input:focus {
+  border-color: var(--color-primary);
+}
+
+.quick-log-cal {
+  border-radius: var(--radius-md);
+}
+
+.quick-log-camera {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-ink-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.quick-log-camera:hover {
+  background: var(--color-primary-wash);
+  color: var(--color-primary);
+}
+
+.quick-log-preview {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}

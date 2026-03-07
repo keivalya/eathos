@@ -68,7 +68,7 @@ export default function PhotoUploader({ onUpload, isAnalyzing }) {
           <div className="drop-zone-icon">
             <ImageIcon size={48} strokeWidth={1.5} />
           </div>
-          <h2 className="drop-zone-title">Snap your fridge.<br />We'll handle dinner.</h2>
+          <h2 className="drop-zone-title">What's in your fridge <em>tonight?</em></h2>
           <p className="drop-zone-subtitle">
             Drop a photo of your fridge, or tap below to upload one.
           </p>
