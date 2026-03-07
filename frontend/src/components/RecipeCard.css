@@ -1,15 +1,17 @@
-/* RecipeCard styles */
+/* RecipeCard styles — Eathos brand */
 
 .recipe-card {
   background: var(--color-white);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-2xl);
   overflow: hidden;
   box-shadow: var(--shadow-md);
   animation: slide-in-right 0.4s ease;
+  border: 1px solid var(--color-border);
 }
 
 .recipe-card.accepted {
-  box-shadow: var(--shadow-glow-forest);
+  box-shadow: var(--shadow-glow-primary);
+  border-color: var(--color-primary-light);
 }
 
 /* Image area */
@@ -18,7 +20,7 @@
   width: 100%;
   height: 260px;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--color-cream-dark), var(--color-sage));
+  background: linear-gradient(135deg, var(--color-bg-warm), var(--color-primary-wash));
 }
 
 .recipe-image {
@@ -36,8 +38,9 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-3);
-  color: var(--color-charcoal-light);
-  background: linear-gradient(135deg, var(--color-cream-dark) 0%, var(--color-sage) 100%);
+  color: var(--color-ink-mid);
+  background: linear-gradient(135deg, var(--color-bg-warm) 0%, var(--color-primary-wash) 100%);
+  font-family: var(--font-display);
   font-style: italic;
   font-size: var(--text-lg);
 }
@@ -57,11 +60,12 @@
 }
 
 .recipe-title {
-  font-family: var(--font-heading);
-  font-size: var(--text-2xl);
-  font-weight: var(--weight-bold);
-  color: var(--color-charcoal);
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-normal);
+  color: var(--color-ink);
   margin-bottom: var(--space-3);
+  font-style: italic;
 }
 
 .recipe-meta {
@@ -75,24 +79,39 @@
   align-items: center;
   gap: var(--space-1);
   font-size: var(--text-xs);
-  color: var(--color-charcoal-light);
-  background: var(--color-cream);
+  color: var(--color-ink-mid);
+  background: var(--color-surface);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
 }
 
 .cuisine-tag {
-  background: rgba(199, 91, 57, 0.08);
-  color: var(--color-terracotta);
+  background: var(--color-accent-wash);
+  color: var(--color-accent);
+}
+
+.video-tag {
+  background: var(--color-berry-wash);
+  color: var(--color-berry);
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-body);
+  transition: all var(--transition-fast);
+}
+
+.video-tag:hover {
+  background: var(--color-berry);
+  color: var(--color-white);
 }
 
 /* Reasoning Panel */
 .reasoning-panel {
   margin: var(--space-4) var(--space-6);
-  background: var(--color-cream);
-  border-radius: var(--radius-md);
+  background: var(--color-primary-wash);
+  border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-4);
   animation: fade-in 0.4s ease both;
+  border-left: 3px solid var(--color-primary);
 }
 
 .reasoning-toggle {
@@ -101,7 +120,7 @@
   justify-content: space-between;
   width: 100%;
   background: none;
-  color: var(--color-charcoal);
+  color: var(--color-ink);
   font-weight: var(--weight-medium);
   font-size: var(--text-sm);
 }
@@ -125,13 +144,13 @@
 
 .reasoning-content p {
   font-size: var(--text-sm);
-  color: var(--color-charcoal-light);
+  color: var(--color-ink-mid);
   line-height: var(--leading-relaxed);
 }
 
 .reasoning-preview {
   font-size: var(--text-sm);
-  color: var(--color-charcoal-light);
+  color: var(--color-ink-mid);
   margin-top: var(--space-2);
   line-height: var(--leading-relaxed);
 }
@@ -146,7 +165,7 @@
   font-family: var(--font-heading);
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
-  color: var(--color-charcoal);
+  color: var(--color-ink);
   margin-bottom: var(--space-3);
 }
 
@@ -169,11 +188,11 @@
 }
 
 .ingredient-item:hover {
-  background: var(--color-cream);
+  background: var(--color-bg-warm);
 }
 
 .ingredient-item.expiring {
-  background: rgba(212, 147, 13, 0.06);
+  background: rgba(232, 146, 42, 0.06);
 }
 
 .ingredient-check {
@@ -186,26 +205,26 @@
 }
 
 .check-icon {
-  color: var(--color-forest);
+  color: var(--color-primary);
 }
 
 .buy-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--color-cream-dark);
-  border: 1px solid var(--color-sage);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
 
 .ingredient-text {
   flex: 1;
-  color: var(--color-charcoal);
+  color: var(--color-ink);
 }
 
 .expiring-tag {
   font-size: var(--text-xs);
-  color: var(--color-amber);
-  background: rgba(212, 147, 13, 0.1);
+  color: var(--color-saffron);
+  background: rgba(232, 146, 42, 0.1);
   padding: 1px 6px;
   border-radius: var(--radius-sm);
   font-weight: var(--weight-medium);
@@ -213,8 +232,8 @@
 
 .buy-tag {
   font-size: var(--text-xs);
-  color: var(--color-terracotta);
-  background: rgba(199, 91, 57, 0.08);
+  color: var(--color-accent);
+  background: var(--color-accent-wash);
   padding: 1px 6px;
   border-radius: var(--radius-sm);
 }
@@ -238,12 +257,12 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--color-forest);
+  background: var(--color-primary);
   color: var(--color-white);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   flex-shrink: 0;
@@ -251,7 +270,7 @@
 
 .step-item p {
   font-size: var(--text-sm);
-  color: var(--color-charcoal);
+  color: var(--color-ink);
   line-height: var(--leading-relaxed);
   padding-top: 3px;
 }
@@ -272,14 +291,14 @@
 .nutrition-label {
   width: 70px;
   font-size: var(--text-xs);
-  color: var(--color-charcoal-light);
+  color: var(--color-ink-mid);
   font-weight: var(--weight-medium);
 }
 
 .nutrition-bar-track {
   flex: 1;
   height: 6px;
-  background: var(--color-cream-dark);
+  background: var(--color-surface);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
@@ -295,22 +314,22 @@
   text-align: right;
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: var(--color-charcoal-light);
+  color: var(--color-ink-mid);
 }
 
 /* Nutritional gaps */
 .nutritional-gaps {
   margin: 0 var(--space-6);
   padding: var(--space-3) var(--space-4);
-  background: rgba(212, 147, 13, 0.06);
+  background: var(--color-lemon-wash);
   border-radius: var(--radius-md);
-  border-left: 3px solid var(--color-amber);
+  border-left: 3px solid var(--color-lemon);
   animation: fade-in 0.4s ease both;
 }
 
 .nutritional-gaps p {
   font-size: var(--text-sm);
-  color: var(--color-charcoal-light);
+  color: var(--color-ink-mid);
   line-height: var(--leading-relaxed);
 }
 
@@ -331,8 +350,10 @@
 }
 
 .free-input-prompt {
-  font-size: var(--text-sm);
-  color: var(--color-charcoal-light);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-style: italic;
+  color: var(--color-ink-mid);
   margin-bottom: var(--space-3);
 }
 
@@ -344,16 +365,16 @@
 .free-input-field {
   flex: 1;
   padding: var(--space-3) var(--space-4);
-  border: 2px solid var(--color-cream-dark);
-  border-radius: var(--radius-md);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-full);
   font-size: var(--text-sm);
-  color: var(--color-charcoal);
-  background: var(--color-cream);
+  color: var(--color-ink);
+  background: var(--color-bg-warm);
   transition: border-color var(--transition-fast);
 }
 
 .free-input-field:focus {
-  border-color: var(--color-terracotta);
+  border-color: var(--color-primary);
 }
 
 /* Accepted banner */
@@ -363,11 +384,12 @@
   justify-content: center;
   gap: var(--space-3);
   padding: var(--space-6);
-  background: rgba(46, 107, 79, 0.06);
-  color: var(--color-forest);
-  font-family: var(--font-heading);
+  background: var(--color-primary-wash);
+  color: var(--color-primary-dark);
+  font-family: var(--font-display);
   font-size: var(--text-xl);
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-normal);
+  font-style: italic;
   animation: fade-in 0.4s ease;
 }
 
@@ -377,7 +399,7 @@
   }
 
   .recipe-title {
-    font-size: var(--text-xl);
+    font-size: var(--text-2xl);
   }
 
   .recipe-actions {

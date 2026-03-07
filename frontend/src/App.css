@@ -1,5 +1,5 @@
 /* =====================================================
-   App-level layout styles
+   App-level layout styles — Eathos brand
    ===================================================== */
 
 .app-layout {
@@ -27,8 +27,9 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-3) var(--space-4);
-  background: var(--color-amber-light);
-  color: var(--color-charcoal);
+  background: var(--color-lemon-wash);
+  border-left: 3px solid var(--color-saffron);
+  color: var(--color-ink);
   border-radius: var(--radius-md);
   margin-bottom: var(--space-4);
   font-size: var(--text-sm);
@@ -37,7 +38,7 @@
 
 .error-banner button {
   background: none;
-  color: var(--color-charcoal);
+  color: var(--color-ink);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   text-decoration: underline;
@@ -58,17 +59,19 @@
 .loading-state .loading-icon {
   font-size: 3rem;
   margin-bottom: var(--space-4);
-  animation: pulse-dot 2s ease infinite;
+  animation: float 2s ease infinite;
 }
 
 .loading-state h2 {
-  font-family: var(--font-heading);
-  color: var(--color-charcoal);
+  font-family: var(--font-display);
+  font-weight: var(--weight-light);
+  font-style: italic;
+  color: var(--color-ink);
   margin-bottom: var(--space-2);
 }
 
 .loading-state p {
-  color: var(--color-charcoal-light);
+  color: var(--color-ink-mid);
   max-width: 400px;
 }
 
@@ -77,6 +80,7 @@
   .app-layout {
     flex-direction: column;
     padding: var(--space-4);
+    padding-bottom: calc(var(--bottom-nav-height) + var(--space-4));
   }
 
   .trace-sidebar {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChefHat, RefreshCw, ChevronDown, ChevronUp, Check, UtensilsCrossed, Clock, Users, Flame, Send } from 'lucide-react';
+import { ChefHat, RefreshCw, ChevronDown, ChevronUp, Check, UtensilsCrossed, Clock, Users, Flame, Send, Play } from 'lucide-react';
 import './RecipeCard.css';
 
 function NutritionBar({ label, value, unit, max, color }) {
@@ -50,6 +50,9 @@ export default function RecipeCard({
           <span className="meta-tag"><Users size={14} /> {recipe.servings} servings</span>
           <span className="meta-tag"><Flame size={14} /> {recipe.difficulty}</span>
           <span className="meta-tag cuisine-tag">{recipe.cuisine}</span>
+          <button className="meta-tag video-tag" onClick={() => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(recipe.title + ' recipe')}`, '_blank')}>
+            <Play size={12} /> Watch Prep
+          </button>
         </div>
       </div>
 
@@ -110,10 +113,10 @@ export default function RecipeCard({
         <div className="recipe-section nutrition-section" style={{ animationDelay: '400ms' }}>
           <h3>Nutrition (per serving)</h3>
           <div className="nutrition-grid">
-            <NutritionBar label="Calories" value={recipe.nutrition.calories} unit="kcal" max={800} color="var(--color-terracotta)" />
-            <NutritionBar label="Protein" value={recipe.nutrition.protein_g} unit="g" max={60} color="var(--color-forest)" />
-            <NutritionBar label="Carbs" value={recipe.nutrition.carbs_g} unit="g" max={100} color="var(--color-amber)" />
-            <NutritionBar label="Fat" value={recipe.nutrition.fat_g} unit="g" max={40} color="var(--color-sage)" />
+            <NutritionBar label="Calories" value={recipe.nutrition.calories} unit="kcal" max={800} color="var(--color-accent)" />
+            <NutritionBar label="Protein" value={recipe.nutrition.protein_g} unit="g" max={60} color="var(--color-primary)" />
+            <NutritionBar label="Carbs" value={recipe.nutrition.carbs_g} unit="g" max={100} color="var(--color-lemon)" />
+            <NutritionBar label="Fat" value={recipe.nutrition.fat_g} unit="g" max={40} color="var(--color-saffron)" />
           </div>
         </div>
       )}
