@@ -199,6 +199,52 @@ async def user_action(action: UserAction):
     return {"session_id": session_id, "events": events}
 
 
+class ChatMessage(BaseModel):
+    """Request body for the /api/chat endpoint."""
+    session_id: str
+    message: str
+
+
+@app.post("/api/session/new")
+async def new_session():
+    """Create a new blank session for chatting."""
+    session = await session_service.create_session(
+        app_name="fridge-recipe", user_id="user"
+    )
+    _sessions[session.id] = session
+    return {"session_id": session.id}
+
+
+@app.post("/api/chat")
+async def chat(body: ChatMessage):
+    """Send a free-form chat message within an existing session."""
+    session = await session_service.get_session(
+        app_name="fridge-recipe", user_id="user", session_id=body.session_id
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    user_message = types.Content(
+        role="user",
+        parts=[types.Part(text=body.message)],
+    )
+
+    replies = []
+    async for event in runner.run_async(
+        session_id=body.session_id, user_id="user", new_message=user_message
+    ):
+        if event.content and event.content.parts:
+            for part in event.content.parts:
+                if part.text:
+                    try:
+                        parsed = json.loads(part.text)
+                        replies.append(parsed)
+                    except json.JSONDecodeError:
+                        replies.append({"text": part.text})
+
+    return {"session_id": body.session_id, "replies": replies}
+
+
 @app.get("/api/inventory/{session_id}")
 async def get_inventory(session_id: str):
     """Get the current inventory for a session."""
