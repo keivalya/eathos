@@ -39,7 +39,7 @@ Eathos uses a multi-agent AI pipeline built on **Google ADK** and **Gemini** to 
 
 ## Architecture
 
-![Eathos Backend Architecture](docs/eathos_backend_architecture.svg)
+![Eathos Backend Architecture](build_files/docs/eathos_backend_architecture.svg)
 
 ### Project Structure
 
